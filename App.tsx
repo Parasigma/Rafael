@@ -124,7 +124,7 @@ const App: React.FC = () => {
          <div className="absolute inset-0 z-0 select-none pointer-events-none overflow-hidden bg-[#0d161b]">
             <div className="absolute inset-0 bg-black/40 z-10"></div> 
             <img 
-              src="/cabecera-boda.jpg" 
+              src="./cabecera-boda.jpg" 
               alt="Pareja de novios en estilo One Piece"
               className="w-full h-full object-cover object-[center_20%] opacity-50" 
             />
@@ -229,7 +229,7 @@ const App: React.FC = () => {
               {/* Watercolor Image */}
               <div className="w-full h-full max-w-[500px] absolute inset-0 m-auto -z-10 mix-blend-multiply">
                 <img 
-                  src="public/Gemini_Generated_Image_czf3i0czf3i0czf3.png" 
+                  src="./Gemini_Generated_Image_czf3i0czf3i0czf3.png" 
                   alt="La Finca" 
                   className="w-full h-full object-contain filter opacity-90"
                 />
