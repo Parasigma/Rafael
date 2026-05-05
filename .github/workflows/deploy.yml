@@ -1,0 +1,40 @@
+# Nombre de nuestra automatización
+name: Compilar y Desplegar Web
+
+# Cuándo debe ejecutarse: Cada vez que haya cambios en la rama 'main'
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Descarga el código del repositorio
+      - name: Descargar código
+        uses: actions/checkout@v3
+
+      # 2. Prepara el entorno de programación (Node.js)
+      - name: Instalar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # 3. Instala las dependencias del proyecto
+      - name: Instalar dependencias
+        run: npm install
+
+      # 4. Compila el código .tsx a web estática
+      - name: Compilar proyecto
+        run: npm run build
+
+      # 5. Publica la carpeta compilada en la rama 'gh-pages'
+      - name: Desplegar en GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist  # NOTA: Cambiar a ./build si usas Create React App
