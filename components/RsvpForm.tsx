@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Guest } from '../types';
 import { Send, CheckCircle2, Crown } from 'lucide-react';
-import { generateThankYouMessage } from '../services/geminiService';
 
 interface RsvpFormProps {
   onSubmit: (guest: Guest) => void;
@@ -31,8 +30,8 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    // Get AI thank you message
-    const msg = await generateThankYouMessage(formData.fullName);
+    // Static thank you message
+    const msg = `¡Gracias por confirmar tu asistencia, ${formData.fullName}! Nos hace muchísima ilusión poder compartir este día tan especial contigo.`;
     setSuccessMsg(msg);
 
     const newGuest: Guest = {
