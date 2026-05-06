@@ -7,7 +7,8 @@ interface RsvpFormProps {
 }
 
 export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
-  const [formData, setFormData] = useState<Partial<Guest>>({
+  // Hemos añadido mainDish al estado inicial
+  const [formData, setFormData] = useState<Partial<Guest> & { mainDish?: string }>({
     fullName: '',
     email: '',
     attending: 'yes',
@@ -16,6 +17,7 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
     needsTransport: 'no',
     message: '',
     wantsToBeCaptain: false,
+    mainDish: '', 
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -27,29 +29,62 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
 
     setIsSubmitting(true);
     
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Static thank you message
-    const msg = `¡Gracias por confirmar tu asistencia, ${formData.fullName}! Nos hace muchísima ilusión poder compartir este día tan especial contigo.`;
-    setSuccessMsg(msg);
+    try {
+      // 1. Conexión con FormSubmit para enviar el email
+      await fetch("https://formsubmit.co/ajax/parasigmita@gmail.com", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            // Configuraciones de FormSubmit
+            _subject: `¡Nueva confirmación de boda! - ${formData.fullName}`,
+            _cc: "lmarcosmarin@gmail.com", // Aquí añadimos el segundo correo
+            _template: "table", // Diseño bonito para el correo
+            
+            // Datos del invitado que llegarán al correo
+            Nombre: formData.fullName,
+            Email: formData.email,
+            Asistencia: formData.attending === 'yes' ? 'Sí, allí estaré' : 'No podré asistir',
+            Plato_Principal: formData.mainDish || 'No aplica',
+            Acompañantes: formData.companions,
+            Alergias: formData.dietaryRestrictions || 'Ninguna',
+            Transporte: formData.needsTransport,
+            Capitan_Mesa: formData.wantsToBeCaptain ? 'Sí' : 'No',
+            Mensaje: formData.message || 'Sin mensaje'
+        })
+      });
 
-    const newGuest: Guest = {
-      id: crypto.randomUUID(),
-      submittedAt: new Date().toISOString(),
-      fullName: formData.fullName!,
-      email: formData.email!,
-      attending: formData.attending as 'yes' | 'no' | 'pending',
-      companions: Number(formData.companions) || 0,
-      dietaryRestrictions: formData.dietaryRestrictions || '',
-      needsTransport: formData.needsTransport || 'no',
-      message: formData.message || '',
-      wantsToBeCaptain: formData.wantsToBeCaptain,
-    };
+      // 2. Mensaje de éxito
+      const msg = formData.attending === 'yes' 
+        ? `¡Gracias por confirmar tu asistencia, ${formData.fullName}! Nos hace muchísima ilusión poder compartir este día tan especial contigo.`
+        : `Sentimos mucho que no puedas venir, ${formData.fullName}. ¡Te echaremos de menos!`;
+      setSuccessMsg(msg);
 
-    onSubmit(newGuest);
-    setIsSubmitting(false);
-    setIsSuccess(true);
+      // 3. Lógica interna de tu app
+      const newGuest = {
+        id: crypto.randomUUID(),
+        submittedAt: new Date().toISOString(),
+        fullName: formData.fullName!,
+        email: formData.email!,
+        attending: formData.attending as 'yes' | 'no' | 'pending',
+        companions: Number(formData.companions) || 0,
+        dietaryRestrictions: formData.dietaryRestrictions || '',
+        needsTransport: formData.needsTransport || 'no',
+        message: formData.message || '',
+        wantsToBeCaptain: formData.wantsToBeCaptain,
+      } as Guest;
+
+      onSubmit(newGuest);
+      setIsSuccess(true);
+
+    } catch (error) {
+      console.error("Error al enviar el formulario", error);
+      alert("Hubo un error al enviar el formulario. Por favor, inténtalo de nuevo.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSuccess) {
@@ -59,7 +94,7 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
         <h3 className="text-2xl font-cinzel text-gray-800 mb-2">¡Confirmado!</h3>
         <p className="text-gray-600 font-serif italic mb-6">"{successMsg}"</p>
         <button 
-          onClick={() => { setIsSuccess(false); setFormData({ fullName: '', email: '', attending: 'yes', companions: 0, message: '', dietaryRestrictions: '', needsTransport: 'no', wantsToBeCaptain: false}) }}
+          onClick={() => { setIsSuccess(false); setFormData({ fullName: '', email: '', attending: 'yes', companions: 0, message: '', dietaryRestrictions: '', needsTransport: 'no', wantsToBeCaptain: false, mainDish: ''}) }}
           className="text-sm text-green-700 underline hover:text-green-800"
         >
           Enviar otro formulario
@@ -131,6 +166,36 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
 
       {formData.attending === 'yes' && (
         <div className="animate-in slide-in-from-top-4 duration-300">
+          
+          {/* NUEVA PREGUNTA: CARNE O PESCADO */}
+          <div className="space-y-2 mb-6">
+            <label className="text-sm font-semibold text-gray-700 tracking-wide">¿Para el plato principal vas a querer carne o pescado?</label>
+            <div className="flex gap-4 mt-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="radio" 
+                  name="mainDish" 
+                  value="Carne"
+                  checked={formData.mainDish === 'Carne'}
+                  onChange={() => setFormData({ ...formData, mainDish: 'Carne' })}
+                  className="accent-wedding-gold h-4 w-4"
+                />
+                <span className="text-gray-700">Carne</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="radio" 
+                  name="mainDish" 
+                  value="Pescado"
+                  checked={formData.mainDish === 'Pescado'}
+                  onChange={() => setFormData({ ...formData, mainDish: 'Pescado' })}
+                  className="accent-wedding-gold h-4 w-4"
+                />
+                <span className="text-gray-700">Pescado</span>
+              </label>
+            </div>
+          </div>
+
           <div className="space-y-2 mb-6">
              <label className="text-sm font-semibold text-gray-700 tracking-wide">Número de acompañantes (sin contarte a ti)</label>
              <input
