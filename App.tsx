@@ -264,11 +264,11 @@ const TituloHaki = () => {
 
                 <div className="bg-wedding-cream p-6 rounded-lg shadow-sm border border-gray-100 hover:border-wedding-gold/30 transition-colors">
                     <div className="flex items-start gap-4">
-                      <div className="text-2xl">🇯🇵</div>
+                      <div className="text-2xl"></div>
                       <div>
                         <h4 className="font-cinzel font-bold text-gray-800 mb-2">Estilo</h4>
                         <p className="text-gray-600 font-sans text-sm">
-                          Toques Sakura & Minimalismo.
+                          Formal, evitar el color verde (solo para damas)
                         </p>
                       </div>
                     </div>
