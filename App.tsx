@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // ¡Añadido useEffect aquí!
+import React, { useState, useEffect } from 'react';
 import { ViewMode, Guest } from './types';
 import { INITIAL_GUESTS, VENUE_NAME } from './constants';
 import { Sakura } from './components/Sakura';
@@ -11,7 +11,8 @@ import { Timeline } from './components/Timeline';
 import { GiftSection } from './components/GiftSection'; 
 import { ScrollReveal } from './components/ScrollReveal';
 import { ImuCharacter } from './components/ImuCharacter';
-import { Lock, Heart, Flower, MapPin, Calendar, ArrowRight, Star, Leaf, Wine, Users, Clock } from 'lucide-react';
+// IMPORTANTE: Aquí está el ChevronDown añadido correctamente
+import { Lock, Heart, Flower, MapPin, Calendar, ArrowRight, Star, Leaf, Wine, Users, Clock, ChevronDown } from 'lucide-react';
 
 const TituloHaki = () => {
   const [showHaki, setShowHaki] = useState(false);
@@ -55,39 +56,31 @@ const App: React.FC = () => {
   const [adminPassword, setAdminPassword] = useState('');
   const [loginError, setLoginError] = useState(false);
 
-  // --- NUEVO: ESTADO PARA EL HUEVO DE PASCUA DE ACE ---
+  // Estado para el huevo de pascua de ACE
   const [showAceFire, setShowAceFire] = useState(false);
 
   useEffect(() => {
     let sequence = '';
     
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Guardar la tecla presionada siempre en minúsculas
       sequence += e.key.toLowerCase();
 
-      // Mantener solo los últimos 3 caracteres en memoria
       if (sequence.length > 3) {
         sequence = sequence.slice(-3);
       }
 
-      // Si la secuencia es "ace", activar llamarada
       if (sequence === 'ace') {
         setShowAceFire(true);
-        // Apagar el fuego después de 1 segundo (1000 milisegundos)
         setTimeout(() => {
           setShowAceFire(false);
         }, 1000); 
-        sequence = ''; // Resetear la memoria para que puedan volver a hacerlo
+        sequence = ''; 
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    
-    // Limpieza de memoria al cerrar
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
-  // --- FIN NUEVO ---
-
 
   // Navigation Handlers
   const handleRsvpSubmit = (newGuest: Guest) => {
@@ -115,7 +108,7 @@ const App: React.FC = () => {
     );
   }
 
-  // --- Admin Login Modal (Simple Overlay) ---
+  // --- Admin Login Modal ---
   if (viewMode === ViewMode.ADMIN_LOGIN) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-sakura-pink/20 relative">
@@ -162,19 +155,15 @@ const App: React.FC = () => {
     <div className="min-h-screen text-gray-800 font-sans relative">
       <Sakura />
       
-      {/* --- NUEVO: EFECTO DE LLAMARADA DE ACE --- */}
+      {/* Efecto de llamarada de ACE */}
       {showAceFire && (
         <div className="fixed inset-0 z-[9999] pointer-events-none flex items-center justify-center bg-gradient-to-t from-red-600 via-orange-500 to-yellow-400 opacity-90 mix-blend-color-burn animate-in fade-in duration-200">
-          {/* Animación extra para que parezca fuego vivo */}
           <div className="absolute inset-0 bg-[radial-gradient(circle,_var(--tw-gradient-stops))] from-white/40 via-transparent to-transparent animate-pulse"></div>
-          
-          {/* Opcional: El nombre de su ataque para darle más epicidad */}
           <h1 className="relative text-white font-black text-8xl md:text-9xl tracking-widest italic drop-shadow-[0_0_20px_rgba(220,38,38,1)] transform -rotate-12 scale-150 animate-out zoom-out duration-1000">
             ¡HIKEN!
           </h1>
         </div>
       )}
-      {/* --- FIN NUEVO --- */}
 
       {/* Navigation Bar */}
       <nav className="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-white/20 transition-all duration-300">
@@ -200,7 +189,7 @@ const App: React.FC = () => {
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* Hero Section CORREGIDO */}
       <section id="home" className="relative h-screen flex flex-col items-center justify-center text-center px-4 pt-20 overflow-hidden">
          
          {/* Background Image Layer */}
@@ -246,6 +235,16 @@ const App: React.FC = () => {
              </a>
            </div>
          </div>
+
+         {/* Flecha Animada para Scroll */}
+         <a 
+            href="#details" 
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 text-white/60 hover:text-wedding-gold transition-colors duration-300 animate-bounce"
+            aria-label="Desplazarse hacia abajo"
+         >
+            <ChevronDown className="h-10 w-10 drop-shadow-lg" strokeWidth={1.5} />
+         </a>
+
       </section>
 
       {/* Countdown Section */}
@@ -404,9 +403,7 @@ const App: React.FC = () => {
         
         <div className="relative z-10 max-w-4xl mx-auto px-4">
            <div className="text-center mb-12">
-             
              <TituloHaki />
-             
              <p className="font-cinzel text-xl text-gray-300">Esperamos verte allí</p>
            </div>
            
