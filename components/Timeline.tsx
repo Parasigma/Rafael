@@ -2,6 +2,15 @@ import React from 'react';
 import { Users, Heart, Wine, Utensils, Music, Sparkles } from 'lucide-react';
 
 export const Timeline: React.FC = () => {
+
+  // 1. NUEVA FUNCIÓN: Se encarga de reproducir el audio
+  const reproducirSonido = () => {
+    // Sonido de prueba (libre de derechos de Google)
+    const audioUrl = 'https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg';
+    const audio = new Audio(audioUrl);
+    audio.play();
+  };
+
   const events = [
     {
       time: "11:30 - 12:00",
@@ -32,6 +41,9 @@ export const Timeline: React.FC = () => {
       title: "Fiesta & Barra Libre",
       description: "¡A bailar! DJ, barra libre y recena para cerrar la noche mágica.",
       icon: <Music className="w-5 h-5 text-purple-400" />,
+      // 2. NUEVAS PROPIEDADES: Hacemos este evento especial e interactivo
+      isInteractive: true,
+      onClick: reproducirSonido
     }
   ];
 
@@ -51,7 +63,14 @@ export const Timeline: React.FC = () => {
 
               {/* Icon Marker */}
               <div className="absolute left-8 md:left-1/2 -translate-x-1/2 flex items-center justify-center w-12 h-12 rounded-full bg-white border-4 border-wedding-cream shadow-lg z-10">
-                 <div className="w-8 h-8 rounded-full bg-wedding-gold/10 flex items-center justify-center">
+                 {/* 3. MODIFICACIÓN VISUAL: Añadimos cursor-pointer y el evento onClick si existen */}
+                 <div 
+                    className={`w-8 h-8 rounded-full bg-wedding-gold/10 flex items-center justify-center transition-all duration-300
+                      ${event.isInteractive ? 'cursor-pointer hover:bg-purple-100 hover:scale-110' : ''}
+                    `}
+                    onClick={event.isInteractive ? event.onClick : undefined}
+                    title={event.isInteractive ? "¡Toca para escuchar!" : ""}
+                 >
                     {event.icon}
                  </div>
               </div>
