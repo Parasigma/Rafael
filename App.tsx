@@ -1,16 +1,206 @@
+import React, { useState, useEffect } from 'react'; // ¡Añadido useEffect aquí!
+import { ViewMode, Guest } from './types';
+import { INITIAL_GUESTS, VENUE_NAME } from './constants';
+import { Sakura } from './components/Sakura';
+import { Countdown } from './components/Countdown';
+import { WeatherWidget } from './components/WeatherWidget';
+import { RsvpForm } from './components/RsvpForm';
+import { AdminDashboard } from './components/AdminDashboard';
+import { VenueMap } from './components/VenueMap'; 
+import { Timeline } from './components/Timeline'; 
+import { GiftSection } from './components/GiftSection'; 
 import { ScrollReveal } from './components/ScrollReveal';
 import { ImuCharacter } from './components/ImuCharacter';
 import { Lock, Heart, Flower, MapPin, Calendar, ArrowRight, Star, Leaf, Wine, Users, Clock } from 'lucide-react';
-// Solo añade ChevronDown al final de esta lista que ya tienes:
-import { Lock, Heart, Flower, MapPin, Calendar, ArrowRight, Star, Leaf, Wine, Users, Clock, ChevronDown } from 'lucide-react';
 
 const TituloHaki = () => {
-const [showHaki, setShowHaki] = useState(false);
-@@ -246,6 +248,64 @@ const App: React.FC = () => {
-</a>
-</div>
-</div>
-        {/* Hero Section */}
+  const [showHaki, setShowHaki] = useState(false);
+
+  const dispararHaki = () => {
+    if (showHaki) return;
+    setShowHaki(true);
+    setTimeout(() => {
+      setShowHaki(false);
+    }, 800);
+  };
+
+  return (
+    <div className="relative inline-block cursor-default select-none" onClick={dispararHaki}>
+      {showHaki && (
+        <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+          <svg className="absolute -top-10 -left-12 w-16 h-16 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(-45deg)' }}>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+          <svg className="absolute -top-10 -right-12 w-16 h-16 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(45deg)' }}>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+          <svg className="absolute -bottom-6 -left-8 w-12 h-12 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(-135deg)' }}>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+          <svg className="absolute -bottom-6 -right-8 w-12 h-12 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(135deg)' }}>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+          <div className="absolute w-32 h-32 border-4 border-black rounded-full opacity-0 animate-[ping_0.5s_ease-out_1] drop-shadow-[0_0_5px_rgba(220,38,38,0.8)]"></div>
+        </div>
+      )}
+      <h2 className="relative z-10 font-script text-6xl mb-4 text-wedding-gold-light">RyL</h2>
+    </div>
+  );
+};
+
+const App: React.FC = () => {
+  // Application State
+  const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.GUEST);
+  const [guests, setGuests] = useState<Guest[]>(INITIAL_GUESTS);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [loginError, setLoginError] = useState(false);
+
+  // --- NUEVO: ESTADO PARA EL HUEVO DE PASCUA DE ACE ---
+  const [showAceFire, setShowAceFire] = useState(false);
+
+  useEffect(() => {
+    let sequence = '';
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Guardar la tecla presionada siempre en minúsculas
+      sequence += e.key.toLowerCase();
+
+      // Mantener solo los últimos 3 caracteres en memoria
+      if (sequence.length > 3) {
+        sequence = sequence.slice(-3);
+      }
+
+      // Si la secuencia es "ace", activar llamarada
+      if (sequence === 'ace') {
+        setShowAceFire(true);
+        // Apagar el fuego después de 1 segundo (1000 milisegundos)
+        setTimeout(() => {
+          setShowAceFire(false);
+        }, 1000); 
+        sequence = ''; // Resetear la memoria para que puedan volver a hacerlo
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    
+    // Limpieza de memoria al cerrar
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+  // --- FIN NUEVO ---
+
+
+  // Navigation Handlers
+  const handleRsvpSubmit = (newGuest: Guest) => {
+    setGuests(prev => [newGuest, ...prev]);
+  };
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (adminPassword === 'boda2026') { 
+      setViewMode(ViewMode.ADMIN_DASHBOARD);
+      setLoginError(false);
+      setAdminPassword('');
+    } else {
+      setLoginError(true);
+    }
+  };
+
+  // --- Admin Dashboard View ---
+  if (viewMode === ViewMode.ADMIN_DASHBOARD) {
+    return (
+      <AdminDashboard 
+        guests={guests} 
+        onLogout={() => setViewMode(ViewMode.GUEST)} 
+      />
+    );
+  }
+
+  // --- Admin Login Modal (Simple Overlay) ---
+  if (viewMode === ViewMode.ADMIN_LOGIN) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-sakura-pink/20 relative">
+        <Sakura />
+        <div className="bg-white p-8 rounded-xl shadow-xl max-w-sm w-full z-10 mx-4 border border-white/50 backdrop-blur-sm">
+          <div className="text-center mb-6">
+            <Lock className="h-10 w-10 text-wedding-gold mx-auto mb-2" />
+            <h2 className="text-2xl font-cinzel text-gray-800">Acceso Novios</h2>
+          </div>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <input
+                type="password"
+                placeholder="Contraseña"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-wedding-gold focus:outline-none"
+                value={adminPassword}
+                onChange={e => setAdminPassword(e.target.value)}
+              />
+              {loginError && <p className="text-red-500 text-xs mt-1">Contraseña incorrecta.</p>}
+            </div>
+            <div className="flex gap-2">
+              <button 
+                type="button" 
+                onClick={() => setViewMode(ViewMode.GUEST)}
+                className="flex-1 py-2 text-gray-500 hover:text-gray-700 text-sm"
+              >
+                Volver
+              </button>
+              <button 
+                type="submit"
+                className="flex-1 bg-gray-900 text-white py-2 rounded-lg hover:bg-gray-800"
+              >
+                Entrar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // --- Main Guest View ---
+  return (
+    <div className="min-h-screen text-gray-800 font-sans relative">
+      <Sakura />
+      
+      {/* --- NUEVO: EFECTO DE LLAMARADA DE ACE --- */}
+      {showAceFire && (
+        <div className="fixed inset-0 z-[9999] pointer-events-none flex items-center justify-center bg-gradient-to-t from-red-600 via-orange-500 to-yellow-400 opacity-90 mix-blend-color-burn animate-in fade-in duration-200">
+          {/* Animación extra para que parezca fuego vivo */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle,_var(--tw-gradient-stops))] from-white/40 via-transparent to-transparent animate-pulse"></div>
+          
+          {/* Opcional: El nombre de su ataque para darle más epicidad */}
+          <h1 className="relative text-white font-black text-8xl md:text-9xl tracking-widest italic drop-shadow-[0_0_20px_rgba(220,38,38,1)] transform -rotate-12 scale-150 animate-out zoom-out duration-1000">
+            ¡HIKEN!
+          </h1>
+        </div>
+      )}
+      {/* --- FIN NUEVO --- */}
+
+      {/* Navigation Bar */}
+      <nav className="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-white/20 transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            <div className="font-script text-3xl md:text-4xl text-gray-900 cursor-pointer">
+              Rafa & Laura
+            </div>
+            <div className="hidden md:flex space-x-8 items-center text-sm font-cinzel tracking-widest text-gray-600">
+              <a href="#home" className="hover:text-wedding-gold transition-colors">Inicio</a>
+              <a href="#details" className="hover:text-wedding-gold transition-colors">Detalles</a>
+              <a href="#itinerary" className="hover:text-wedding-gold transition-colors">Itinerario</a>
+              <a href="#rsvp" className="hover:text-wedding-gold transition-colors">Confirmar</a>
+            </div>
+            <button 
+              onClick={() => setViewMode(ViewMode.ADMIN_LOGIN)}
+              className="p-2 text-gray-400 hover:text-wedding-gold transition-colors rounded-full"
+              title="Admin Login"
+            >
+              <Lock className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
       <section id="home" className="relative h-screen flex flex-col items-center justify-center text-center px-4 pt-20 overflow-hidden">
          
          {/* Background Image Layer */}
@@ -56,18 +246,189 @@ const [showHaki, setShowHaki] = useState(false);
              </a>
            </div>
          </div>
-
-         {/* --- NUEVO: FLECHA ANIMADA PARA SCROLL --- */}
-         <a 
-            href="#details" 
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 text-white/60 hover:text-wedding-gold transition-colors duration-300 animate-bounce"
-            aria-label="Desplazarse hacia abajo"
-         >
-            <ChevronDown className="h-10 w-10 drop-shadow-lg" strokeWidth={1.5} />
-         </a>
-         {/* --- FIN NUEVO --- */}
-
       </section>
-</section>
 
-{/* Countdown Section */}
+      {/* Countdown Section */}
+      <section className="bg-gradient-to-b from-white to-sakura-pink/10 py-16 px-4">
+        <ScrollReveal>
+          <div className="max-w-4xl mx-auto text-center">
+            <Heart className="h-8 w-8 text-wedding-gold mx-auto mb-6 animate-pulse" />
+            <h2 className="font-cinzel text-3xl md:text-4xl mb-8 text-gray-800">La Cuenta Atrás</h2>
+            <Countdown />
+          </div>
+        </ScrollReveal>
+      </section>
+
+      {/* Details & Location */}
+      <section id="details" className="py-24 px-4 max-w-7xl mx-auto overflow-hidden bg-white relative">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-sakura-pink/10 rounded-full blur-3xl -z-10" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-wedding-gold/5 rounded-full blur-3xl -z-10" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-24">
+          
+          <ScrollReveal className="relative z-10">
+            <div className="space-y-8">
+              <div>
+                <h2 className="font-cinzel text-4xl mb-4 text-gray-900">El Lugar</h2>
+                <div className="h-1 w-20 bg-wedding-gold mb-6"></div>
+                <p className="font-serif text-lg leading-relaxed text-gray-600">
+                  Celebraremos nuestro enlace en <span className="font-bold text-gray-800">{VENUE_NAME}</span>, 
+                  una finca mágica en las afueras de Alicante, rodeados de jardines y bajo la cálida luz del Mediterráneo,
+                  un lugar donde cada instante se convierte en un recuerdo inolvidable.
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-wedding-cream p-6 rounded-lg shadow-sm border border-gray-100 hover:border-wedding-gold/30 transition-colors">
+                    <div className="flex items-start gap-4">
+                      <Flower className="h-6 w-6 text-pink-300 mt-1" />
+                      <div>
+                        <h4 className="font-cinzel font-bold text-gray-800 mb-2">Código Vestimenta</h4>
+                        <p className="text-gray-600 font-sans text-sm">Formal / Etiqueta.</p>
+                      </div>
+                    </div>
+                </div>
+
+                <div className="bg-wedding-cream p-6 rounded-lg shadow-sm border border-gray-100 hover:border-wedding-gold/30 transition-colors">
+                    <div className="flex items-start gap-4">
+                      <div className="text-2xl"></div>
+                      <div>
+                        <h4 className="font-cinzel font-bold text-gray-800 mb-2">Estilo</h4>
+                        <p className="text-gray-600 font-sans text-sm">
+                          Formal, evitar el color verde (solo para damas)
+                        </p>
+                      </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </ScrollReveal>
+
+          {/* Gallery & Weather Composition */}
+          <ScrollReveal delay="delay-200">
+            <div className="relative h-[500px] lg:h-[600px] w-full mt-8 lg:mt-0 flex items-center justify-center">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-wedding-gold/5 rounded-full blur-3xl -z-20"></div>
+              
+              {/* Watercolor Image */}
+              <div className="w-full h-full max-w-[500px] absolute inset-0 m-auto -z-10 mix-blend-multiply">
+                <img 
+                  src="./Gemini_Generated_Image_czf3i0czf3i0czf3.png" 
+                  alt="La Finca" 
+                  className="w-full h-full object-contain filter opacity-90"
+                />
+              </div>
+
+              <div className="absolute -bottom-4 -left-2 md:bottom-4 md:-left-8 z-20 transform scale-90 md:scale-100 origin-bottom-left w-[400px] max-w-[90vw] shadow-2xl">
+                <WeatherWidget />
+              </div>
+            </div>
+          </ScrollReveal>
+        </div>
+
+        {/* Expanded Details Section */}
+        <div className="mt-16 pt-16 border-t border-gray-100">
+           <ScrollReveal>
+             <div className="text-center mb-16">
+                <span className="text-wedding-gold text-sm font-cinzel tracking-widest uppercase">Descubre más</span>
+                <h2 className="font-script text-5xl md:text-6xl text-gray-800 mt-2">El Encanto de El Poblet</h2>
+             </div>
+           </ScrollReveal>
+
+           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              <ScrollReveal className="order-2 lg:order-1">
+                 <VenueMap />
+              </ScrollReveal>
+
+              <ScrollReveal className="order-1 lg:order-2 space-y-8 px-4" delay="delay-200">
+                 <div className="flex gap-4">
+                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-wedding-gold/10 flex items-center justify-center text-wedding-gold">
+                       <Star className="h-6 w-6" />
+                    </div>
+                    <div>
+                       <h3 className="font-cinzel text-xl text-gray-900 font-semibold mb-2">Historia Viva</h3>
+                       <p className="font-serif text-gray-600 leading-relaxed">
+                          El Poblet de las Atalayas es una finca histórica del siglo XVIII cuidadosamente restaurada. 
+                          Su "Casa Grande", de arquitectura tradicional alicantina, y sus patios empedrados crean una atmósfera de elegancia atemporal que nos enamoró desde el primer momento.
+                       </p>
+                    </div>
+                 </div>
+
+                 <div className="flex gap-4">
+                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                       <Leaf className="h-6 w-6" />
+                    </div>
+                    <div>
+                       <h3 className="font-cinzel text-xl text-gray-900 font-semibold mb-2">Jardines Centenarios</h3>
+                       <p className="font-serif text-gray-600 leading-relaxed mb-6">
+                          La ceremonia tendrá lugar en los jardines principales, bajo la sombra de ficus centenarios y rodeados de vegetación mediterránea. 
+                          Un oasis de paz y naturaleza a solo unos minutos del centro de Alicante.
+                       </p>
+                       <div className="flex gap-4">
+                         <div className="w-32 h-32 md:w-40 md:h-40 rounded-lg overflow-hidden shadow-md">
+                           <img src="https://images.unsplash.com/photo-1510076857177-7470076d4098?q=80&w=1000&auto=format&fit=crop" alt="Parral El Poblet" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+                         </div>
+                         <div className="w-32 h-32 md:w-40 md:h-40 rounded-lg overflow-hidden shadow-md">
+                           <img src="https://images.unsplash.com/photo-1469371670807-013ccf25f16a?q=80&w=1000&auto=format&fit=crop" alt="Jardines detalle" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+                         </div>
+                       </div>
+                    </div>
+                 </div>
+              </ScrollReveal>
+           </div>
+        </div>
+      </section>
+
+      {/* Itinerary Section */}
+      <section id="itinerary" className="py-24 bg-sakura-pink/5">
+        <div className="max-w-7xl mx-auto px-4">
+          <ScrollReveal>
+            <div className="text-center mb-12">
+               <Clock className="h-8 w-8 text-wedding-gold mx-auto mb-4" />
+               <h2 className="font-cinzel text-4xl text-gray-800 mb-4">Itinerario del Día</h2>
+               <p className="text-gray-600 font-serif italic">Cada momento cuenta</p>
+            </div>
+          </ScrollReveal>
+          
+          <ScrollReveal delay="delay-300">
+            <Timeline />
+          </ScrollReveal>
+        </div>
+      </section>
+
+     {/* RSVP Section */}
+      <section id="rsvp" className="py-24 bg-gray-900 relative text-white">
+        <div className="absolute inset-0 overflow-hidden opacity-20">
+           <div className="absolute -top-20 -left-20 w-96 h-96 bg-pink-500 rounded-full blur-[100px]"></div>
+           <div className="absolute bottom-0 right-0 w-80 h-80 bg-gold-500 rounded-full blur-[80px]"></div>
+        </div>
+        
+        <div className="relative z-10 max-w-4xl mx-auto px-4">
+           <div className="text-center mb-12">
+             
+             <TituloHaki />
+             
+             <p className="font-cinzel text-xl text-gray-300">Esperamos verte allí</p>
+           </div>
+           
+           <div className="text-gray-800">
+             <RsvpForm onSubmit={handleRsvpSubmit} />
+           </div>
+        </div>
+      </section>
+
+      {/* Gift Section */}
+      <GiftSection />
+
+      {/* Footer */}
+      <footer className="bg-white py-12 text-center border-t border-gray-100 relative overflow-hidden">
+        <div className="font-script text-3xl text-gray-800 mb-4">Rafa & Laura</div>
+        <p className="text-gray-400 text-sm font-cinzel">10 • 10 • 2026</p>
+        
+        {/* Imu asomándose */}
+        <ImuCharacter />
+      </footer>
+    </div>
+  );
+};
+
+export default App;
