@@ -6,7 +6,7 @@ export const Timeline: React.FC = () => {
   // 1. NUEVA FUNCIÓN: Se encarga de reproducir el audio
   const reproducirSonido = () => {
     // Sonido de prueba (libre de derechos de Google)
-    const audioUrl = 'https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg';
+    const audioUrl = './risa-brook.mp3';
     const audio = new Audio(audioUrl);
     audio.play();
   };
