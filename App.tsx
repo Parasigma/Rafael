@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // ¡Añadido useEffect aquí!
 import { ViewMode, Guest } from './types';
 import { INITIAL_GUESTS, VENUE_NAME } from './constants';
 import { Sakura } from './components/Sakura';
@@ -13,6 +13,41 @@ import { ScrollReveal } from './components/ScrollReveal';
 import { ImuCharacter } from './components/ImuCharacter';
 import { Lock, Heart, Flower, MapPin, Calendar, ArrowRight, Star, Leaf, Wine, Users, Clock } from 'lucide-react';
 
+const TituloHaki = () => {
+  const [showHaki, setShowHaki] = useState(false);
+
+  const dispararHaki = () => {
+    if (showHaki) return;
+    setShowHaki(true);
+    setTimeout(() => {
+      setShowHaki(false);
+    }, 800);
+  };
+
+  return (
+    <div className="relative inline-block cursor-default select-none" onClick={dispararHaki}>
+      {showHaki && (
+        <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+          <svg className="absolute -top-10 -left-12 w-16 h-16 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(-45deg)' }}>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+          <svg className="absolute -top-10 -right-12 w-16 h-16 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(45deg)' }}>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+          <svg className="absolute -bottom-6 -left-8 w-12 h-12 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(-135deg)' }}>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+          <svg className="absolute -bottom-6 -right-8 w-12 h-12 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(135deg)' }}>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+          <div className="absolute w-32 h-32 border-4 border-black rounded-full opacity-0 animate-[ping_0.5s_ease-out_1] drop-shadow-[0_0_5px_rgba(220,38,38,0.8)]"></div>
+        </div>
+      )}
+      <h2 className="relative z-10 font-script text-6xl mb-4 text-wedding-gold-light">RyL</h2>
+    </div>
+  );
+};
+
 const App: React.FC = () => {
   // Application State
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.GUEST);
@@ -20,62 +55,40 @@ const App: React.FC = () => {
   const [adminPassword, setAdminPassword] = useState('');
   const [loginError, setLoginError] = useState(false);
 
-// Asegúrate de tener importado useState al principio del archivo:
-// import React, { useState } from 'react';
+  // --- NUEVO: ESTADO PARA EL HUEVO DE PASCUA DE ACE ---
+  const [showAceFire, setShowAceFire] = useState(false);
 
-const TituloHaki = () => {
-  const [showHaki, setShowHaki] = useState(false);
-
-  const dispararHaki = () => {
-    // Si ya está activo, no hacemos nada
-    if (showHaki) return;
+  useEffect(() => {
+    let sequence = '';
     
-    // Encendemos el Haki
-    setShowHaki(true);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Guardar la tecla presionada siempre en minúsculas
+      sequence += e.key.toLowerCase();
+
+      // Mantener solo los últimos 3 caracteres en memoria
+      if (sequence.length > 3) {
+        sequence = sequence.slice(-3);
+      }
+
+      // Si la secuencia es "ace", activar llamarada
+      if (sequence === 'ace') {
+        setShowAceFire(true);
+        // Apagar el fuego después de 1 segundo (1000 milisegundos)
+        setTimeout(() => {
+          setShowAceFire(false);
+        }, 1000); 
+        sequence = ''; // Resetear la memoria para que puedan volver a hacerlo
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
     
-    // Lo apagamos automáticamente después de 800 milisegundos
-    setTimeout(() => {
-      setShowHaki(false);
-    }, 800);
-  };
-
-  return (
-    // relative: para posicionar los rayos. cursor-default: oculta que es un botón
-    <div className="relative inline-block cursor-default select-none" onClick={dispararHaki}>
-      
-      {/* Si showHaki es true, mostramos los rayos */}
-      {showHaki && (
-        <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
-          {/* Rayo 1: Superior izquierdo */}
-          <svg className="absolute -top-10 -left-12 w-16 h-16 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(-45deg)' }}>
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-          </svg>
-          {/* Rayo 2: Superior derecho */}
-          <svg className="absolute -top-10 -right-12 w-16 h-16 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(45deg)' }}>
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-          </svg>
-          {/* Rayo 3: Inferior izquierdo */}
-          <svg className="absolute -bottom-6 -left-8 w-12 h-12 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(-135deg)' }}>
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-          </svg>
-          {/* Rayo 4: Inferior derecho */}
-          <svg className="absolute -bottom-6 -right-8 w-12 h-12 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(135deg)' }}>
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-          </svg>
-          
-          {/* Onda expansiva de impacto */}
-          <div className="absolute w-32 h-32 border-4 border-black rounded-full opacity-0 animate-[ping_0.5s_ease-out_1] drop-shadow-[0_0_5px_rgba(220,38,38,0.8)]"></div>
-        </div>
-      )}
-
-      {/* Tu texto original (el z-10 asegura que esté por encima de los rayos) */}
-      <h2 className="relative z-10 font-script text-6xl mb-4 text-wedding-gold-light">RyL</h2>
-    </div>
-  );
-};
+    // Limpieza de memoria al cerrar
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+  // --- FIN NUEVO ---
 
 
-  
   // Navigation Handlers
   const handleRsvpSubmit = (newGuest: Guest) => {
     setGuests(prev => [newGuest, ...prev]);
@@ -149,6 +162,20 @@ const TituloHaki = () => {
     <div className="min-h-screen text-gray-800 font-sans relative">
       <Sakura />
       
+      {/* --- NUEVO: EFECTO DE LLAMARADA DE ACE --- */}
+      {showAceFire && (
+        <div className="fixed inset-0 z-[9999] pointer-events-none flex items-center justify-center bg-gradient-to-t from-red-600 via-orange-500 to-yellow-400 opacity-90 mix-blend-color-burn animate-in fade-in duration-200">
+          {/* Animación extra para que parezca fuego vivo */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle,_var(--tw-gradient-stops))] from-white/40 via-transparent to-transparent animate-pulse"></div>
+          
+          {/* Opcional: El nombre de su ataque para darle más epicidad */}
+          <h1 className="relative text-white font-black text-8xl md:text-9xl tracking-widest italic drop-shadow-[0_0_20px_rgba(220,38,38,1)] transform -rotate-12 scale-150 animate-out zoom-out duration-1000">
+            ¡HIKEN!
+          </h1>
+        </div>
+      )}
+      {/* --- FIN NUEVO --- */}
+
       {/* Navigation Bar */}
       <nav className="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-white/20 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -346,8 +373,6 @@ const TituloHaki = () => {
                        </div>
                     </div>
                  </div>
-
-
               </ScrollReveal>
            </div>
         </div>
@@ -380,7 +405,6 @@ const TituloHaki = () => {
         <div className="relative z-10 max-w-4xl mx-auto px-4">
            <div className="text-center mb-12">
              
-             {/* AQUÍ LLAMAMOS A NUESTRO NUEVO COMPONENTE DE HAKI */}
              <TituloHaki />
              
              <p className="font-cinzel text-xl text-gray-300">Esperamos verte allí</p>
