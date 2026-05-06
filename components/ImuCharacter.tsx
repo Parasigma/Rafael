@@ -18,7 +18,7 @@ export const ImuCharacter: React.FC = () => {
       title="Imu"
     >
       {showMessage && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[90vw] -top-12 left-1/2 -translate-x-1/2 bg-white text-gray-800 text-xs font-bold py-2 px-3 rounded-xl shadow-lg border border-gray-200 whitespace-nowrap animate-bounce">
+       <div className="absolute bottom-full right-0 mb-2 w-max max-w-[90vw] -top-12 left-1/2 -translate-x-1/2 bg-white text-gray-800 text-xs font-bold py-2 px-3 rounded-xl shadow-lg border border-gray-200 whitespace-nowrap animate-bounce">
           ¡¡¡Joyboy!!!
           {/* Triangulito del bocadillo */}
           <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-b border-r border-gray-200 transform rotate-45"></div>
