@@ -20,6 +20,62 @@ const App: React.FC = () => {
   const [adminPassword, setAdminPassword] = useState('');
   const [loginError, setLoginError] = useState(false);
 
+// Asegúrate de tener importado useState al principio del archivo:
+// import React, { useState } from 'react';
+
+const TituloHaki = () => {
+  const [showHaki, setShowHaki] = useState(false);
+
+  const dispararHaki = () => {
+    // Si ya está activo, no hacemos nada
+    if (showHaki) return;
+    
+    // Encendemos el Haki
+    setShowHaki(true);
+    
+    // Lo apagamos automáticamente después de 800 milisegundos
+    setTimeout(() => {
+      setShowHaki(false);
+    }, 800);
+  };
+
+  return (
+    // relative: para posicionar los rayos. cursor-default: oculta que es un botón
+    <div className="relative inline-block cursor-default select-none" onClick={dispararHaki}>
+      
+      {/* Si showHaki es true, mostramos los rayos */}
+      {showHaki && (
+        <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+          {/* Rayo 1: Superior izquierdo */}
+          <svg className="absolute -top-10 -left-12 w-16 h-16 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(-45deg)' }}>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+          {/* Rayo 2: Superior derecho */}
+          <svg className="absolute -top-10 -right-12 w-16 h-16 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(45deg)' }}>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+          {/* Rayo 3: Inferior izquierdo */}
+          <svg className="absolute -bottom-6 -left-8 w-12 h-12 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(-135deg)' }}>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+          {/* Rayo 4: Inferior derecho */}
+          <svg className="absolute -bottom-6 -right-8 w-12 h-12 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(135deg)' }}>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+          
+          {/* Onda expansiva de impacto */}
+          <div className="absolute w-32 h-32 border-4 border-black rounded-full opacity-0 animate-[ping_0.5s_ease-out_1] drop-shadow-[0_0_5px_rgba(220,38,38,0.8)]"></div>
+        </div>
+      )}
+
+      {/* Tu texto original (el z-10 asegura que esté por encima de los rayos) */}
+      <h2 className="relative z-10 font-script text-6xl mb-4 text-wedding-gold-light">RyL</h2>
+    </div>
+  );
+};
+
+
+  
   // Navigation Handlers
   const handleRsvpSubmit = (newGuest: Guest) => {
     setGuests(prev => [newGuest, ...prev]);
@@ -314,7 +370,7 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* RSVP Section */}
+     {/* RSVP Section */}
       <section id="rsvp" className="py-24 bg-gray-900 relative text-white">
         <div className="absolute inset-0 overflow-hidden opacity-20">
            <div className="absolute -top-20 -left-20 w-96 h-96 bg-pink-500 rounded-full blur-[100px]"></div>
@@ -323,7 +379,10 @@ const App: React.FC = () => {
         
         <div className="relative z-10 max-w-4xl mx-auto px-4">
            <div className="text-center mb-12">
-             <h2 className="font-script text-6xl mb-4 text-wedding-gold-light">RyL</h2>
+             
+             {/* AQUÍ LLAMAMOS A NUESTRO NUEVO COMPONENTE DE HAKI */}
+             <TituloHaki />
+             
              <p className="font-cinzel text-xl text-gray-300">Esperamos verte allí</p>
            </div>
            
