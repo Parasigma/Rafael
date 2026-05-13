@@ -225,15 +225,7 @@ const App: React.FC = () => {
              </div>
            </div>
            
-           <div className="mt-16">
-             <a 
-              href="#rsvp"
-              className="group relative inline-flex items-center gap-3 px-8 py-3 bg-wedding-gold text-white font-cinzel tracking-widest text-sm hover:bg-white hover:text-gray-900 transition-colors duration-500 rounded-sm shadow-xl"
-             >
-               Confirmar Asistencia
-               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-             </a>
-           </div>
+           
          </div>
 
          {/* Flecha Animada para Scroll */}
