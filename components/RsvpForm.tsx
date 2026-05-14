@@ -6,8 +6,13 @@ interface RsvpFormProps {
   onSubmit: (guest: Guest) => void;
 }
 
+// Nueva interfaz para organizar la información de cada acompañante
+interface CompanionDetail {
+  name: string;
+  mainDish: string;
+}
+
 export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
-  // Hemos añadido mainDish al estado inicial
   const [formData, setFormData] = useState<Partial<Guest> & { mainDish?: string }>({
     fullName: '',
     email: '',
@@ -19,9 +24,45 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
     wantsToBeCaptain: false,
     mainDish: '', 
   });
+  
+  // Nuevo estado para guardar los detalles de cada acompañante de forma dinámica
+  const [companionDetails, setCompanionDetails] = useState<CompanionDetail[]>([]);
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+
+  // Función mágica que ajusta el número de acompañantes (máximo 6 secreto)
+  const handleCompanionsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let count = parseInt(e.target.value) || 0;
+    
+    // Bloqueo secreto a 6 acompañantes máximo, y no menos de 0
+    if (count > 6) count = 6;
+    if (count < 0) count = 0;
+
+    setFormData({ ...formData, companions: count });
+
+    // Ajustamos la lista de detalles de acompañantes
+    setCompanionDetails(prev => {
+      const newArr = [...prev];
+      // Si hay más acompañantes, añadimos cajones en blanco
+      while (newArr.length < count) {
+        newArr.push({ name: '', mainDish: '' });
+      }
+      // Si se reduce el número, quitamos los que sobran
+      if (newArr.length > count) {
+        newArr.length = count;
+      }
+      return newArr;
+    });
+  };
+
+  // Función para actualizar el nombre o plato de un acompañante en concreto
+  const handleCompanionDetailUpdate = (index: number, field: keyof CompanionDetail, value: string) => {
+    const newArr = [...companionDetails];
+    newArr[index][field] = value;
+    setCompanionDetails(newArr);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +71,12 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
     setIsSubmitting(true);
     
     try {
-      // 1. Conexión con FormSubmit para enviar el email
+      // Preparamos el texto bonito para el email con los datos de los acompañantes
+      const companionsString = companionDetails.length > 0
+        ? companionDetails.map((c, i) => `Acompañante ${i + 1}: ${c.name || 'Sin nombre'} (${c.mainDish || 'Sin plato elegido'})`).join(' | ')
+        : 'Ninguno';
+
+      // 1. Conexión con FormSubmit
       await fetch("https://formsubmit.co/ajax/parasigmita@gmail.com", {
         method: "POST",
         headers: {
@@ -38,21 +84,22 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
             'Accept': 'application/json'
         },
         body: JSON.stringify({
-            // Configuraciones de FormSubmit
             _subject: `¡Nueva confirmación de boda! - ${formData.fullName}`,
-            _cc: "lmarcosmarin@gmail.com", // Aquí añadimos el segundo correo
-            _template: "table", // Diseño bonito para el correo
+            _cc: "lmarcosmarin@gmail.com", 
+            _template: "table",
             
-            // Datos del invitado que llegarán al correo
+            // Datos del invitado principal
             Nombre: formData.fullName,
             Email: formData.email,
             Asistencia: formData.attending === 'yes' ? 'Sí, allí estaré' : 'No podré asistir',
             Plato_Principal: formData.mainDish || 'No aplica',
-            Acompañantes: formData.companions,
             Alergias: formData.dietaryRestrictions || 'Ninguna',
             Transporte: formData.needsTransport,
             Capitan_Mesa: formData.wantsToBeCaptain ? 'Sí' : 'No',
-            Mensaje: formData.message || 'Sin mensaje'
+            Mensaje: formData.message || 'Sin mensaje',
+            // Añadimos la sección dinámica de acompañantes
+            Total_Acompañantes: formData.companions,
+            Detalle_Acompañantes: companionsString
         })
       });
 
@@ -94,7 +141,11 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
         <h3 className="text-2xl font-cinzel text-gray-800 mb-2">¡Confirmado!</h3>
         <p className="text-gray-600 font-serif italic mb-6">"{successMsg}"</p>
         <button 
-          onClick={() => { setIsSuccess(false); setFormData({ fullName: '', email: '', attending: 'yes', companions: 0, message: '', dietaryRestrictions: '', needsTransport: 'no', wantsToBeCaptain: false, mainDish: ''}) }}
+          onClick={() => { 
+            setIsSuccess(false); 
+            setFormData({ fullName: '', email: '', attending: 'yes', companions: 0, message: '', dietaryRestrictions: '', needsTransport: 'no', wantsToBeCaptain: false, mainDish: ''});
+            setCompanionDetails([]); // Reiniciamos también los acompañantes
+          }}
           className="text-sm text-green-700 underline hover:text-green-800"
         >
           Enviar otro formulario
@@ -167,7 +218,7 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
       {formData.attending === 'yes' && (
         <div className="animate-in slide-in-from-top-4 duration-300">
           
-          {/* NUEVA PREGUNTA: CARNE O PESCADO */}
+          {/* PREGUNTA PRINCIPAL: CARNE O PESCADO */}
           <div className="space-y-2 mb-6">
             <label className="text-sm font-semibold text-gray-700 tracking-wide">¿Para el plato principal vas a querer carne o pescado?</label>
             <div className="flex gap-4 mt-2">
@@ -201,12 +252,63 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
              <input
                type="number"
                min="0"
-               max="10"
+               max="6" // Visualmente les dejamos claro que el límite es pequeño
                className="w-full md:w-1/3 border-b-2 border-gray-200 p-2 focus:border-wedding-gold focus:outline-none transition-colors bg-transparent"
                value={formData.companions}
-               onChange={(e) => setFormData({ ...formData, companions: Number(e.target.value) })}
+               onChange={handleCompanionsChange} // Conectado a nuestra nueva función
              />
           </div>
+
+          {/* MENÚ DINÁMICO DE ACOMPAÑANTES */}
+          {companionDetails.length > 0 && (
+            <div className="p-5 mb-6 bg-gray-50 border border-gray-100 rounded-lg space-y-5 animate-in fade-in slide-in-from-top-2">
+              <h4 className="font-cinzel text-gray-800 font-semibold mb-2 border-b border-gray-200 pb-2">Detalles de los acompañantes</h4>
+              
+              {companionDetails.map((companion, index) => (
+                <div key={index} className="space-y-3 pb-4 border-b border-gray-200 last:border-0 last:pb-0">
+                  <p className="text-xs font-bold tracking-widest text-wedding-gold uppercase">Acompañante {index + 1}</p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                    <input
+                      required
+                      type="text"
+                      className="w-full border-b border-gray-300 p-2 text-sm focus:border-wedding-gold focus:outline-none transition-colors bg-transparent"
+                      placeholder="Nombre completo"
+                      value={companion.name}
+                      onChange={(e) => handleCompanionDetailUpdate(index, 'name', e.target.value)}
+                    />
+                    
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-2 cursor-pointer text-sm">
+                        <input 
+                          required
+                          type="radio" 
+                          name={`compDish-${index}`} 
+                          value="Carne"
+                          checked={companion.mainDish === 'Carne'}
+                          onChange={() => handleCompanionDetailUpdate(index, 'mainDish', 'Carne')}
+                          className="accent-wedding-gold h-3.5 w-3.5"
+                        />
+                        <span className="text-gray-700">Carne</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer text-sm">
+                        <input 
+                          required
+                          type="radio" 
+                          name={`compDish-${index}`} 
+                          value="Pescado"
+                          checked={companion.mainDish === 'Pescado'}
+                          onChange={() => handleCompanionDetailUpdate(index, 'mainDish', 'Pescado')}
+                          className="accent-wedding-gold h-3.5 w-3.5"
+                        />
+                        <span className="text-gray-700">Pescado</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
           
           <div className="space-y-2 mb-6">
              <label className="text-sm font-semibold text-gray-700 tracking-wide">Alergias o Restricciones Alimentarias</label>
