@@ -11,7 +11,6 @@ import { Timeline } from './components/Timeline';
 import { GiftSection } from './components/GiftSection'; 
 import { ScrollReveal } from './components/ScrollReveal';
 import { ImuCharacter } from './components/ImuCharacter';
-// IMPORTANTE: Aquí está el ChevronDown añadido correctamente
 import { Lock, Heart, Flower, MapPin, Calendar, ArrowRight, Star, Leaf, Wine, Users, Clock, ChevronDown } from 'lucide-react';
 
 const TituloHaki = () => {
@@ -189,7 +188,7 @@ const App: React.FC = () => {
         </div>
       </nav>
 
-      {/* Hero Section CORREGIDO */}
+      {/* Hero Section */}
       <section id="home" className="relative h-screen flex flex-col items-center justify-center text-center px-4 pt-20 overflow-hidden">
          
          {/* Background Image Layer */}
@@ -224,13 +223,11 @@ const App: React.FC = () => {
                <span>Alicante, España</span>
              </div>
            </div>
-           
-           
          </div>
 
-         {/* Flecha Animada para Scroll */}
+         {/* Flecha Animada para Scroll - Ahora apunta a #countdown */}
          <a 
-            href="#details" 
+            href="#countdown" 
             className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 text-white/60 hover:text-wedding-gold transition-colors duration-300 animate-bounce"
             aria-label="Desplazarse hacia abajo"
          >
@@ -239,8 +236,8 @@ const App: React.FC = () => {
 
       </section>
 
-      {/* Countdown Section */}
-      <section className="bg-gradient-to-b from-white to-sakura-pink/10 py-16 px-4">
+      {/* Countdown Section - Añadido id="countdown" */}
+      <section id="countdown" className="bg-gradient-to-b from-white to-sakura-pink/10 py-16 px-4">
         <ScrollReveal>
           <div className="max-w-4xl mx-auto text-center">
             <Heart className="h-8 w-8 text-wedding-gold mx-auto mb-6 animate-pulse" />
@@ -286,7 +283,7 @@ const App: React.FC = () => {
                       <div>
                         <h4 className="font-cinzel font-bold text-gray-800 mb-2">Estilo</h4>
                         <p className="text-gray-600 font-sans text-sm">
-                          Formal, evitar el color verde (solo para damas)
+                          Evitar colores similares al de la novia y color verde reservado para damas.
                         </p>
                       </div>
                     </div>
@@ -407,6 +404,15 @@ const App: React.FC = () => {
 
       {/* Gift Section */}
       <GiftSection />
+
+      {/* Mensaje de Despedida Añadido */}
+      <div className="bg-white text-center pb-20 pt-8 px-4">
+         <ScrollReveal>
+            <h2 className="font-script text-5xl md:text-6xl text-wedding-gold drop-shadow-sm">
+               ¡Esperamos verte en nuestra boda!
+            </h2>
+         </ScrollReveal>
+      </div>
 
       {/* Footer */}
       <footer className="bg-white py-12 text-center border-t border-gray-100 relative overflow-hidden">
