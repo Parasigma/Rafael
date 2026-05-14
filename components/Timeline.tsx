@@ -13,31 +13,31 @@ export const Timeline: React.FC = () => {
 
   const events = [
     {
-      time: "11:30 - 12:00",
+      time: "12:30 - 13:00",
       title: "Recepción de Invitados",
       description: "Bienvenida en el patio principal con música suave y refrescos.",
       icon: <Users className="w-5 h-5 text-wedding-gold" />,
     },
     {
-      time: "12:30 - 13:15",
+      time: "13:00 - 13:45",
       title: "Ceremonia Civil",
       description: "El momento del 'Sí, quiero' en los jardines centenarios.",
       icon: <Heart className="w-5 h-5 text-pink-400" />,
     },
     {
-      time: "13:30 - 14:30",
+      time: "14:00 - 15:00",
       title: "Cóctel de Bienvenida",
       description: "Aperitivos gourmet y estación de bebidas bajo la pérgola.",
       icon: <Wine className="w-5 h-5 text-red-400" />,
     },
     {
-      time: "14:45 - 16:30",
+      time: "15:30 - 18:00",
       title: "El Gran Banquete",
       description: "Almuerzo servido en mesa con menú degustación mediterráneo.",
       icon: <Utensils className="w-5 h-5 text-wedding-gold" />,
     },
     {
-      time: "17:30 - 23:00",
+      time: "18:30 - 23:00",
       title: "Fiesta & Barra Libre",
       description: "¡A bailar! DJ, barra libre y recena para cerrar la noche mágica.",
       icon: <Music className="w-5 h-5 text-purple-400" />,
