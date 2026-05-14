@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 import { Guest } from '../types';
-import { Send, CheckCircle2, Crown } from 'lucide-react';
+import { Send, CheckCircle2, Crown, Music } from 'lucide-react';
 
 interface RsvpFormProps {
   onSubmit: (guest: Guest) => void;
 }
 
-// Nueva interfaz para organizar la información de cada acompañante
 interface CompanionDetail {
   name: string;
   mainDish: string;
 }
 
 export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
-  const [formData, setFormData] = useState<Partial<Guest> & { mainDish?: string }>({
+  // Hemos añadido songRequest al estado inicial
+  const [formData, setFormData] = useState<Partial<Guest> & { mainDish?: string, songRequest?: string }>({
     fullName: '',
     email: '',
     attending: 'yes',
@@ -23,33 +23,28 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
     message: '',
     wantsToBeCaptain: false,
     mainDish: '', 
+    songRequest: '',
   });
   
-  // Nuevo estado para guardar los detalles de cada acompañante de forma dinámica
   const [companionDetails, setCompanionDetails] = useState<CompanionDetail[]>([]);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
 
-  // Función mágica que ajusta el número de acompañantes (máximo 6 secreto)
   const handleCompanionsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let count = parseInt(e.target.value) || 0;
     
-    // Bloqueo secreto a 6 acompañantes máximo, y no menos de 0
     if (count > 6) count = 6;
     if (count < 0) count = 0;
 
     setFormData({ ...formData, companions: count });
 
-    // Ajustamos la lista de detalles de acompañantes
     setCompanionDetails(prev => {
       const newArr = [...prev];
-      // Si hay más acompañantes, añadimos cajones en blanco
       while (newArr.length < count) {
         newArr.push({ name: '', mainDish: '' });
       }
-      // Si se reduce el número, quitamos los que sobran
       if (newArr.length > count) {
         newArr.length = count;
       }
@@ -57,7 +52,6 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
     });
   };
 
-  // Función para actualizar el nombre o plato de un acompañante en concreto
   const handleCompanionDetailUpdate = (index: number, field: keyof CompanionDetail, value: string) => {
     const newArr = [...companionDetails];
     newArr[index][field] = value;
@@ -71,12 +65,10 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
     setIsSubmitting(true);
     
     try {
-      // Preparamos el texto bonito para el email con los datos de los acompañantes
       const companionsString = companionDetails.length > 0
         ? companionDetails.map((c, i) => `Acompañante ${i + 1}: ${c.name || 'Sin nombre'} (${c.mainDish || 'Sin plato elegido'})`).join(' | ')
         : 'Ninguno';
 
-      // 1. Conexión con FormSubmit
       await fetch("https://formsubmit.co/ajax/parasigmita@gmail.com", {
         method: "POST",
         headers: {
@@ -88,7 +80,6 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
             _cc: "lmarcosmarin@gmail.com", 
             _template: "table",
             
-            // Datos del invitado principal
             Nombre: formData.fullName,
             Email: formData.email,
             Asistencia: formData.attending === 'yes' ? 'Sí, allí estaré' : 'No podré asistir',
@@ -96,20 +87,18 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
             Alergias: formData.dietaryRestrictions || 'Ninguna',
             Transporte: formData.needsTransport,
             Capitan_Mesa: formData.wantsToBeCaptain ? 'Sí' : 'No',
+            Canciones_Sugeridas: formData.songRequest || 'Ninguna', // <-- ¡Añadido al correo!
             Mensaje: formData.message || 'Sin mensaje',
-            // Añadimos la sección dinámica de acompañantes
             Total_Acompañantes: formData.companions,
             Detalle_Acompañantes: companionsString
         })
       });
 
-      // 2. Mensaje de éxito
       const msg = formData.attending === 'yes' 
         ? `¡Gracias por confirmar tu asistencia, ${formData.fullName}! Nos hace muchísima ilusión poder compartir este día tan especial contigo.`
         : `Sentimos mucho que no puedas venir, ${formData.fullName}. ¡Te echaremos de menos!`;
       setSuccessMsg(msg);
 
-      // 3. Lógica interna de tu app
       const newGuest = {
         id: crypto.randomUUID(),
         submittedAt: new Date().toISOString(),
@@ -143,8 +132,8 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
         <button 
           onClick={() => { 
             setIsSuccess(false); 
-            setFormData({ fullName: '', email: '', attending: 'yes', companions: 0, message: '', dietaryRestrictions: '', needsTransport: 'no', wantsToBeCaptain: false, mainDish: ''});
-            setCompanionDetails([]); // Reiniciamos también los acompañantes
+            setFormData({ fullName: '', email: '', attending: 'yes', companions: 0, message: '', dietaryRestrictions: '', needsTransport: 'no', wantsToBeCaptain: false, mainDish: '', songRequest: ''});
+            setCompanionDetails([]); 
           }}
           className="text-sm text-green-700 underline hover:text-green-800"
         >
@@ -218,7 +207,6 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
       {formData.attending === 'yes' && (
         <div className="animate-in slide-in-from-top-4 duration-300">
           
-          {/* PREGUNTA PRINCIPAL: CARNE O PESCADO */}
           <div className="space-y-2 mb-6">
             <label className="text-sm font-semibold text-gray-700 tracking-wide">¿Para el plato principal vas a querer carne o pescado?</label>
             <div className="flex gap-4 mt-2">
@@ -252,14 +240,13 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
              <input
                type="number"
                min="0"
-               max="6" // Visualmente les dejamos claro que el límite es pequeño
+               max="6" 
                className="w-full md:w-1/3 border-b-2 border-gray-200 p-2 focus:border-wedding-gold focus:outline-none transition-colors bg-transparent"
                value={formData.companions}
-               onChange={handleCompanionsChange} // Conectado a nuestra nueva función
+               onChange={handleCompanionsChange} 
              />
           </div>
 
-          {/* MENÚ DINÁMICO DE ACOMPAÑANTES */}
           {companionDetails.length > 0 && (
             <div className="p-5 mb-6 bg-gray-50 border border-gray-100 rounded-lg space-y-5 animate-in fade-in slide-in-from-top-2">
               <h4 className="font-cinzel text-gray-800 font-semibold mb-2 border-b border-gray-200 pb-2">Detalles de los acompañantes</h4>
@@ -349,7 +336,6 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
             </div>
           </div>
           
-          {/* Captain Question */}
           <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200/50 mb-6">
              <label className="flex items-start gap-3 cursor-pointer">
                 <div className="flex items-center h-5">
@@ -371,6 +357,26 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
                 </div>
              </label>
           </div>
+
+          {/* NUEVO: PREGUNTA DE LAS CANCIONES CON LA LETRA PEQUEÑA */}
+          <div className="space-y-2 mb-6">
+             <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 tracking-wide">
+                <Music className="w-4 h-4 text-purple-500" />
+                Una canción que no puede faltar
+             </label>
+             <input
+               type="text"
+               className="w-full border-b-2 border-gray-200 p-2 focus:border-wedding-gold focus:outline-none transition-colors bg-transparent"
+               value={formData.songRequest}
+               onChange={(e) => setFormData({ ...formData, songRequest: e.target.value })}
+               placeholder="Ej. Bink's Sake, Bohemian Rhapsody..."
+             />
+             <p className="text-[10px] text-gray-400 italic mt-1 leading-tight text-justify">
+               * Los novios se guardan el derecho de vetar canciones si se te ocurre pedir reguetón o flamenco, gracias.
+             </p>
+          </div>
+          {/* FIN NUEVO */}
+
         </div>
       )}
 
