@@ -38,9 +38,7 @@ export const GiftSection: React.FC = () => {
           <p className="font-serif text-gray-600 text-lg leading-relaxed mb-4 max-w-2xl mx-auto">
             Vuestra presencia es nuestro mayor regalo. No obstante, si queréis tener un detalle con nosotros para ayudarnos en nuestra nueva aventura, podéis hacerlo de la forma que mejor os venga y como podáis.
           </p>
-          <p className="font-serif text-gray-800 font-medium text-lg mb-12 max-w-xl mx-auto">
-            Para nosotros, las opciones más cómodas son en <span className="text-wedding-gold">Efectivo</span> o por <span className="text-wedding-gold">Bizum</span>.
-          </p>
+        
         </ScrollReveal>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
