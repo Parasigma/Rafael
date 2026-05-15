@@ -336,4 +336,93 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
 
           <div className="space-y-2 mb-6">
             <label className="text-sm font-semibold text-gray-700 tracking-wide">¿Vas a necesitar servicio de transporte?</label>
-            <div
+            <div className="flex gap-4 mt-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="radio" 
+                  name="transport" 
+                  value="Sí"
+                  checked={formData.needsTransport === 'Sí'}
+                  onChange={() => setFormData({ ...formData, needsTransport: 'Sí' })}
+                  className="accent-wedding-gold h-4 w-4"
+                />
+                <span className="text-gray-700">Sí, por favor</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="radio" 
+                  name="transport" 
+                  value="No"
+                  checked={formData.needsTransport === 'No' || formData.needsTransport === 'no'}
+                  onChange={() => setFormData({ ...formData, needsTransport: 'No' })}
+                  className="accent-wedding-gold h-4 w-4"
+                />
+                <span className="text-gray-700">No, gracias</span>
+              </label>
+            </div>
+          </div>
+          
+          <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200/50 mb-6">
+             <label className="flex items-start gap-3 cursor-pointer">
+                <div className="flex items-center h-5">
+                  <input 
+                    type="checkbox" 
+                    checked={formData.wantsToBeCaptain || false}
+                    onChange={(e) => setFormData({ ...formData, wantsToBeCaptain: e.target.checked })}
+                    className="accent-wedding-gold h-4 w-4 mt-0.5"
+                  />
+                </div>
+                <div>
+                   <span className="flex items-center gap-2 text-sm font-semibold text-gray-800">
+                     <Crown className="w-4 h-4 text-yellow-500" />
+                     ¿Te gustaría ser Capitán de Mesa?
+                   </span>
+                   <p className="text-xs text-gray-600 mt-1">
+                     El Capitán es el encargado de animar su mesa, proponer brindis y asegurarse de que la fiesta no pare.
+                   </p>
+                </div>
+             </label>
+          </div>
+
+          <div className="space-y-2 mb-6">
+             <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 tracking-wide">
+                <Music className="w-4 h-4 text-purple-500" />
+                Una canción que no puede faltar
+             </label>
+             <input
+               type="text"
+               className="w-full border-b-2 border-gray-200 p-2 focus:border-wedding-gold focus:outline-none transition-colors bg-transparent"
+               value={formData.songRequest}
+               onChange={(e) => setFormData({ ...formData, songRequest: e.target.value })}
+               placeholder="Ej. Bink's Sake, Bohemian Rhapsody..."
+             />
+             <p className="text-[10px] text-gray-400 italic mt-1 leading-tight text-justify">
+               * Los novios se guardan el derecho de vetar canciones si se te ocurre pedir reguetón o flamenco, gracias.
+             </p>
+          </div>
+
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <label className="text-sm font-semibold text-gray-700 tracking-wide">Mensaje para los novios</label>
+        <textarea
+          rows={3}
+          className="w-full border-2 border-gray-100 rounded-lg p-3 focus:border-wedding-gold focus:outline-none transition-colors resize-none"
+          value={formData.message}
+          onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+          placeholder="Escribe algo bonito..."
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="w-full bg-gray-900 text-wedding-gold-light py-3 px-6 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-cinzel tracking-wider flex items-center justify-center gap-2"
+      >
+        {isSubmitting ? 'Enviando...' : 'ENVIAR RESPUESTA'}
+        {!isSubmitting && <Send className="h-4 w-4" />}
+      </button>
+    </form>
+  );
+};
