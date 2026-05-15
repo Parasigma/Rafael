@@ -34,10 +34,10 @@ const TituloHaki = () => {
           <svg className="absolute -top-10 -right-12 w-16 h-16 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(45deg)' }}>
             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
           </svg>
-          <svg className="absolute -bottom-6 -left-8 w-12 h-12 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(-135deg)' }}>
+          <svg className="absolute -bottom-6 -left-8 w-12 h-12 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(-20deg)' }}>
             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
           </svg>
-          <svg className="absolute -bottom-6 -right-8 w-12 h-12 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(135deg)' }}>
+          <svg className="absolute -bottom-6 -right-8 w-12 h-12 text-black drop-shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(20deg)' }}>
             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
           </svg>
           <div className="absolute w-32 h-32 border-4 border-black rounded-full opacity-0 animate-[ping_0.5s_ease-out_1] drop-shadow-[0_0_5px_rgba(220,38,38,0.8)]"></div>
@@ -115,7 +115,7 @@ const App: React.FC = () => {
         <div className="bg-white p-8 rounded-xl shadow-xl max-w-sm w-full z-10 mx-4 border border-white/50 backdrop-blur-sm">
           <div className="text-center mb-6">
             <Lock className="h-10 w-10 text-wedding-gold mx-auto mb-2" />
-            <h2 className="text-2xl font-cinzel text-gray-800">Admin</h2>
+            <h2 className="text-2xl font-cinzel text-gray-800">Acceso Novios</h2>
           </div>
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
@@ -156,9 +156,9 @@ const App: React.FC = () => {
       
       {/* Efecto de llamarada de ACE */}
       {showAceFire && (
-        <div className="fixed inset-0 z-[9999] pointer-events-none flex items-center justify-center bg-gradient-to-t from-red-600 via-orange-500 to-yellow-400 opacity-90 mix-blend-color-burn animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[9999] pointer-events-none flex items-center justify-center bg-gradient-to-t from-red-600 via-orange-500 to-yellow-400 opacity-90 mix-blend-color-burn animate-in fade-in duration-500">
           <div className="absolute inset-0 bg-[radial-gradient(circle,_var(--tw-gradient-stops))] from-white/40 via-transparent to-transparent animate-pulse"></div>
-          <h1 className="relative text-white font-black text-8xl md:text-9xl tracking-widest italic drop-shadow-[0_0_20px_rgba(220,38,38,1)] transform -rotate-12 scale-150 animate-out zoom-out duration-1000">
+          <h1 className="relative text-white font-black text-8xl md:text-9xl tracking-widest italic drop-shadow-[0_0_20px_rgba(220,38,38,1)] transform -rotate-12 scale-150 animate-out zoom-out duration-700">
             ¡HIKEN!
           </h1>
         </div>
@@ -202,8 +202,8 @@ const App: React.FC = () => {
          </div>
 
          {/* Decorative Circle */}
-         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[500px] md:h-[500px] border border-wedding-gold/20 rounded-full animate-spin [animation-duration:60s] pointer-events-none z-0" />
-         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] md:w-[480px] md:h-[480px] border border-wedding-gold/10 rounded-full animate-spin [animation-duration:45s] pointer-events-none z-0" style={{ animationDirection: 'reverse' }} />
+         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[500px] md:h-[500px] border border-wedding-gold/20 rounded-full animate-spin [animation-duration:20s]"></div>
+         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] md:w-[480px] md:h-[480px] border border-wedding-gold/10 rounded-full animate-spin [animation-duration:30s] [animation-direction:reverse]"></div>
 
          <div className="z-10 animate-in fade-in zoom-in duration-1000 relative">
            <p className="font-cinzel tracking-[0.3em] text-gray-200 text-sm md:text-base mb-6 uppercase drop-shadow-md">
@@ -353,10 +353,10 @@ const App: React.FC = () => {
                        </p>
                        <div className="flex gap-4">
                          <div className="w-32 h-32 md:w-40 md:h-40 rounded-lg overflow-hidden shadow-md">
-                           <img src="https://images.unsplash.com/photo-1510076857177-7470076d4098?q=80&w=1000&auto=format&fit=crop" alt="Parral El Poblet" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+                           <img src="https://images.unsplash.com/photo-1510076857177-7470076d4098?q=80&w=1000&auto=format&fit=crop" alt="Parral El Poblet" className="w-full h-full object-cover hover:scale-110 transition-transform" />
                          </div>
                          <div className="w-32 h-32 md:w-40 md:h-40 rounded-lg overflow-hidden shadow-md">
-                           <img src="https://images.unsplash.com/photo-1469371670807-013ccf25f16a?q=80&w=1000&auto=format&fit=crop" alt="Jardines detalle" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+                           <img src="https://images.unsplash.com/photo-1469371670807-013ccf25f16a?q=80&w=1000&auto=format&fit=crop" alt="Jardines detalle" className="w-full h-full object-cover hover:scale-110 transition-transform" />
                          </div>
                        </div>
                     </div>
