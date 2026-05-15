@@ -12,7 +12,6 @@ interface CompanionDetail {
 }
 
 export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
-  // Hemos añadido songRequest al estado inicial
   const [formData, setFormData] = useState<Partial<Guest> & { mainDish?: string, songRequest?: string }>({
     fullName: '',
     email: '',
@@ -69,7 +68,8 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
         ? companionDetails.map((c, i) => `Acompañante ${i + 1}: ${c.name || 'Sin nombre'} (${c.mainDish || 'Sin plato elegido'})`).join(' | ')
         : 'Ninguno';
 
-      await fetch("https://formsubmit.co/ajax/parasigmita@gmail.com", {
+      // 1. Envío seguro convirtiendo TODO a cadenas de texto
+      const response = await fetch("https://formsubmit.co/ajax/parasigmita@gmail.com", {
         method: "POST",
         headers: {
             'Content-Type': 'application/json',
@@ -80,27 +80,37 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
             _cc: "lmarcosmarin@gmail.com", 
             _template: "table",
             
-            Nombre: formData.fullName,
-            Email: formData.email,
+            Nombre: String(formData.fullName),
+            Email: String(formData.email),
             Asistencia: formData.attending === 'yes' ? 'Sí, allí estaré' : 'No podré asistir',
-            Plato_Principal: formData.mainDish || 'No aplica',
-            Alergias: formData.dietaryRestrictions || 'Ninguna',
-            Transporte: formData.needsTransport,
+            Plato_Principal: String(formData.mainDish || 'No aplica'),
+            Alergias: String(formData.dietaryRestrictions || 'Ninguna'),
+            Transporte: String(formData.needsTransport),
             Capitan_Mesa: formData.wantsToBeCaptain ? 'Sí' : 'No',
-            Canciones_Sugeridas: formData.songRequest || 'Ninguna', // <-- ¡Añadido al correo!
-            Mensaje: formData.message || 'Sin mensaje',
-            Total_Acompañantes: formData.companions,
-            Detalle_Acompañantes: companionsString
+            Canciones_Sugeridas: String(formData.songRequest || 'Ninguna'),
+            Mensaje: String(formData.message || 'Sin mensaje'),
+            Total_Acompañantes: String(formData.companions), // <-- Esto causaba el bloqueo
+            Detalle_Acompañantes: String(companionsString)
         })
       });
+
+      // Si FormSubmit rechaza la petición, disparamos el error conscientemente
+      if (!response.ok) {
+         throw new Error("El servidor de correo rechazó la petición.");
+      }
 
       const msg = formData.attending === 'yes' 
         ? `¡Gracias por confirmar tu asistencia, ${formData.fullName}! Nos hace muchísima ilusión poder compartir este día tan especial contigo.`
         : `Sentimos mucho que no puedas venir, ${formData.fullName}. ¡Te echaremos de menos!`;
       setSuccessMsg(msg);
 
+      // 2. Fallback de seguridad para el generador de IDs en móviles
+      const safeId = (window.crypto && window.crypto.randomUUID) 
+        ? window.crypto.randomUUID() 
+        : Date.now().toString();
+
       const newGuest = {
-        id: crypto.randomUUID(),
+        id: safeId,
         submittedAt: new Date().toISOString(),
         fullName: formData.fullName!,
         email: formData.email!,
@@ -116,8 +126,8 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
       setIsSuccess(true);
 
     } catch (error) {
-      console.error("Error al enviar el formulario", error);
-      alert("Hubo un error al enviar el formulario. Por favor, inténtalo de nuevo.");
+      console.error("Error al enviar el formulario:", error);
+      alert("Hubo un error de conexión al enviar el formulario. Por favor, inténtalo de nuevo.");
     } finally {
       setIsSubmitting(false);
     }
@@ -358,7 +368,6 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
              </label>
           </div>
 
-          {/* NUEVO: PREGUNTA DE LAS CANCIONES CON LA LETRA PEQUEÑA */}
           <div className="space-y-2 mb-6">
              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 tracking-wide">
                 <Music className="w-4 h-4 text-purple-500" />
@@ -375,30 +384,8 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
                * Los novios se guardan el derecho de vetar canciones si se te ocurre pedir reguetón o flamenco, gracias.
              </p>
           </div>
-          {/* FIN NUEVO */}
 
         </div>
       )}
 
-      <div className="space-y-2">
-        <label className="text-sm font-semibold text-gray-700 tracking-wide">Mensaje para los novios</label>
-        <textarea
-          rows={3}
-          className="w-full border-2 border-gray-100 rounded-lg p-3 focus:border-wedding-gold focus:outline-none transition-colors resize-none"
-          value={formData.message}
-          onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-          placeholder="Escribe algo bonito..."
-        />
-      </div>
-
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full bg-gray-900 text-wedding-gold-light py-3 px-6 rounded-md hover:bg-gray-800 transition-all duration-300 font-cinzel tracking-wider flex items-center justify-center gap-2 disabled:opacity-50"
-      >
-        {isSubmitting ? 'Enviando...' : 'ENVIAR RESPUESTA'}
-        {!isSubmitting && <Send className="h-4 w-4" />}
-      </button>
-    </form>
-  );
-};
+      <div className="space
