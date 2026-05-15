@@ -26,10 +26,8 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
   });
   
   const [companionDetails, setCompanionDetails] = useState<CompanionDetail[]>([]);
-  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [successMsg, setSuccessMsg] = useState("");
 
   const handleCompanionsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let count = parseInt(e.target.value) || 0;
@@ -64,7 +62,7 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
     // Validar que todos los acompañantes tengan nombre y plato
     const allCompanionsValid = companionDetails.every(c => c.name.trim() && c.mainDish);
     if (companionDetails.length > 0 && !allCompanionsValid) {
-      alert('Por favor, completa el nombre y plato de todos los acompañantes');
+      alert('Por favor, completa el nombre y plato de todos los acompañantes.');
       return;
     }
 
@@ -72,50 +70,40 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
     
     try {
       const companionsString = companionDetails.length > 0
-        ? companionDetails.map((c, i) => `Acompañante ${i + 1}: ${c.name || 'Sin nombre'} (${c.mainDish || 'Sin plato elegido'})`).join(' | ')
+        ? companionDetails.map((c, i) => `Acompanante ${i + 1}: ${c.name || 'Sin nombre'} (${c.mainDish || 'Sin plato'})`).join(' | ')
         : 'Ninguno';
 
-      // 1. Empaquetamos los datos como un formulario clásico (FormData)
-      const submitData = new FormData();
-      
-      submitData.append("_subject", `¡Nueva confirmación de boda! - ${formData.fullName}`);
-      submitData.append("_cc", "lmarcosmarin@gmail.com"); 
-      submitData.append("_template", "table");
-      submitData.append("_captcha", "false");
-
-      submitData.append("Nombre", String(formData.fullName));
-      submitData.append("Email", String(formData.email));
-      submitData.append("Asistencia", formData.attending === 'yes' ? 'Sí, allí estaré' : 'No podré asistir');
-      submitData.append("Plato_Principal", String(formData.mainDish || 'No aplica'));
-      submitData.append("Alergias", String(formData.dietaryRestrictions || 'Ninguna'));
-      submitData.append("Transporte", String(formData.needsTransport));
-      submitData.append("Capitan_Mesa", formData.wantsToBeCaptain ? 'Sí' : 'No');
-      submitData.append("Canciones_Sugeridas", String(formData.songRequest || 'Ninguna'));
-      submitData.append("Mensaje", String(formData.message || 'Sin mensaje'));
-      submitData.append("Total_Acompañantes", String(formData.companions));
-      submitData.append("Detalle_Acompañantes", String(companionsString));
-
-      // ¡AQUÍ ESTÁ LA SOLUCIÓN! Añadimos el header 'Accept' para decirle al servidor
-      // que NO intente redirigirnos a una página web y que solo devuelva datos invisibles (JSON).
+      // VOLVEMOS AL MÉTODO ORIGINAL 100% FUNCIONAL
       const response = await fetch("https://formsubmit.co/ajax/parasigmita@gmail.com", {
         method: "POST",
         headers: {
+            'Content-Type': 'application/json',
             'Accept': 'application/json'
         },
-        body: submitData
+        body: JSON.stringify({
+            _subject: `¡Nueva confirmación de boda! - ${formData.fullName}`,
+            _template: "table",
+            
+            // DATOS LIMPIOS SIN "Ñ" NI CARACTERES RAROS EN LAS CLAVES
+            Nombre: formData.fullName,
+            Email: formData.email,
+            Asistencia: formData.attending === 'yes' ? 'Sí, allí estaré' : 'No podré asistir',
+            Plato_Principal: formData.mainDish || 'No aplica',
+            Numero_Acompanantes: formData.companions,
+            Detalles_Acompanantes: companionsString,
+            Alergias: formData.dietaryRestrictions || 'Ninguna',
+            Transporte: formData.needsTransport,
+            Capitan_Mesa: formData.wantsToBeCaptain ? 'Sí' : 'No',
+            Canciones_Sugeridas: formData.songRequest || 'Ninguna',
+            Mensaje: formData.message || 'Sin mensaje'
+        })
       });
 
       if (!response.ok) {
-        const errorInfo = await response.text();
-        console.error("FormSubmit devolvió un error:", errorInfo);
-        throw new Error(`El servidor rechazó el envío (Código: ${response.status})`);
+        throw new Error("El servidor de FormSubmit rechazó el envío de datos.");
       }
 
-      const msg = formData.attending === 'yes' 
-        ? `¡Gracias por confirmar tu asistencia, ${formData.fullName}! Nos hace muchísima ilusión poder compartir este día tan especial contigo.`
-        : `Sentimos mucho que no puedas venir, ${formData.fullName}. ¡Te echaremos de menos!`;
-      setSuccessMsg(msg);
-
+      // Lógica interna para la vista de Administrador de la web
       const safeId = (window.crypto && window.crypto.randomUUID) 
         ? window.crypto.randomUUID() 
         : Date.now().toString();
@@ -137,8 +125,8 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
       setIsSuccess(true);
 
     } catch (error) {
-      console.error("Error al enviar el formulario:", error);
-      alert("Hubo un bloqueo en la conexión al servidor. Si estás usando un bloqueador de anuncios (como AdBlock), desactívalo un segundo para confirmar tu asistencia.");
+      console.error(error);
+      alert("Error en el envío. El servidor de correo no responde, por favor inténtalo de nuevo en unos minutos.");
     } finally {
       setIsSubmitting(false);
     }
@@ -162,6 +150,10 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
   };
 
   if (isSuccess) {
+    const successMsg = formData.attending === 'yes' 
+        ? `¡Gracias por confirmar tu asistencia, ${formData.fullName}! Nos hace muchísima ilusión poder compartir este día tan especial contigo.`
+        : `Sentimos mucho que no puedas venir, ${formData.fullName}. ¡Te echaremos de menos!`;
+
     return (
       <div className="text-center p-8 bg-green-50 rounded-lg border border-green-200 animate-in fade-in duration-700">
         <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
@@ -344,93 +336,4 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
 
           <div className="space-y-2 mb-6">
             <label className="text-sm font-semibold text-gray-700 tracking-wide">¿Vas a necesitar servicio de transporte?</label>
-            <div className="flex gap-4 mt-2">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input 
-                  type="radio" 
-                  name="transport" 
-                  value="Sí"
-                  checked={formData.needsTransport === 'Sí'}
-                  onChange={() => setFormData({ ...formData, needsTransport: 'Sí' })}
-                  className="accent-wedding-gold h-4 w-4"
-                />
-                <span className="text-gray-700">Sí, por favor</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input 
-                  type="radio" 
-                  name="transport" 
-                  value="No"
-                  checked={formData.needsTransport === 'No' || formData.needsTransport === 'no'}
-                  onChange={() => setFormData({ ...formData, needsTransport: 'No' })}
-                  className="accent-wedding-gold h-4 w-4"
-                />
-                <span className="text-gray-700">No, gracias</span>
-              </label>
-            </div>
-          </div>
-          
-          <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200/50 mb-6">
-             <label className="flex items-start gap-3 cursor-pointer">
-                <div className="flex items-center h-5">
-                  <input 
-                    type="checkbox" 
-                    checked={formData.wantsToBeCaptain || false}
-                    onChange={(e) => setFormData({ ...formData, wantsToBeCaptain: e.target.checked })}
-                    className="accent-wedding-gold h-4 w-4 mt-0.5"
-                  />
-                </div>
-                <div>
-                   <span className="flex items-center gap-2 text-sm font-semibold text-gray-800">
-                     <Crown className="w-4 h-4 text-yellow-500" />
-                     ¿Te gustaría ser Capitán de Mesa?
-                   </span>
-                   <p className="text-xs text-gray-600 mt-1">
-                     El Capitán es el encargado de animar su mesa, proponer brindis y asegurarse de que la fiesta no pare.
-                   </p>
-                </div>
-             </label>
-          </div>
-
-          <div className="space-y-2 mb-6">
-             <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 tracking-wide">
-                <Music className="w-4 h-4 text-purple-500" />
-                Una canción que no puede faltar
-             </label>
-             <input
-               type="text"
-               className="w-full border-b-2 border-gray-200 p-2 focus:border-wedding-gold focus:outline-none transition-colors bg-transparent"
-               value={formData.songRequest}
-               onChange={(e) => setFormData({ ...formData, songRequest: e.target.value })}
-               placeholder="Ej. Bink's Sake, Bohemian Rhapsody..."
-             />
-             <p className="text-[10px] text-gray-400 italic mt-1 leading-tight text-justify">
-               * Los novios se guardan el derecho de vetar canciones si se te ocurre pedir reguetón o flamenco, gracias.
-             </p>
-          </div>
-
-        </div>
-      )}
-
-      <div className="space-y-2">
-        <label className="text-sm font-semibold text-gray-700 tracking-wide">Mensaje para los novios</label>
-        <textarea
-          rows={3}
-          className="w-full border-2 border-gray-100 rounded-lg p-3 focus:border-wedding-gold focus:outline-none transition-colors resize-none"
-          value={formData.message}
-          onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-          placeholder="Escribe algo bonito..."
-        />
-      </div>
-
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full bg-gray-900 text-wedding-gold-light py-3 px-6 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-cinzel tracking-wider flex items-center justify-center gap-2"
-      >
-        {isSubmitting ? 'Enviando...' : 'ENVIAR RESPUESTA'}
-        {!isSubmitting && <Send className="h-4 w-4" />}
-      </button>
-    </form>
-  );
-};
+            <div
