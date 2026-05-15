@@ -75,16 +75,14 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
         ? companionDetails.map((c, i) => `Acompañante ${i + 1}: ${c.name || 'Sin nombre'} (${c.mainDish || 'Sin plato elegido'})`).join(' | ')
         : 'Ninguno';
 
-      // NUEVO MÉTODO: Usamos FormData para saltarnos el bloqueo CORS del navegador
+      // 1. Empaquetamos los datos como un formulario clásico (FormData)
       const submitData = new FormData();
       
-      // Configuraciones ocultas de FormSubmit
       submitData.append("_subject", `¡Nueva confirmación de boda! - ${formData.fullName}`);
       submitData.append("_cc", "lmarcosmarin@gmail.com"); 
       submitData.append("_template", "table");
       submitData.append("_captcha", "false");
 
-      // Datos reales del formulario
       submitData.append("Nombre", String(formData.fullName));
       submitData.append("Email", String(formData.email));
       submitData.append("Asistencia", formData.attending === 'yes' ? 'Sí, allí estaré' : 'No podré asistir');
@@ -97,9 +95,13 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
       submitData.append("Total_Acompañantes", String(formData.companions));
       submitData.append("Detalle_Acompañantes", String(companionsString));
 
-      // Enviamos la petición SIN headers. El navegador configurará el "multipart/form-data" automáticamente
+      // ¡AQUÍ ESTÁ LA SOLUCIÓN! Añadimos el header 'Accept' para decirle al servidor
+      // que NO intente redirigirnos a una página web y que solo devuelva datos invisibles (JSON).
       const response = await fetch("https://formsubmit.co/ajax/parasigmita@gmail.com", {
         method: "POST",
+        headers: {
+            'Accept': 'application/json'
+        },
         body: submitData
       });
 
@@ -136,7 +138,7 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
 
     } catch (error) {
       console.error("Error al enviar el formulario:", error);
-      alert("Hubo un error de conexión con el servidor. Por favor, inténtalo de nuevo.");
+      alert("Hubo un bloqueo en la conexión al servidor. Si estás usando un bloqueador de anuncios (como AdBlock), desactívalo un segundo para confirmar tu asistencia.");
     } finally {
       setIsSubmitting(false);
     }
