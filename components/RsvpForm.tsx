@@ -18,7 +18,7 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
     attending: 'yes',
     companions: 0,
     dietaryRestrictions: '',
-    needsTransport: 'no',
+    needsTransport: 'No',
     message: '',
     wantsToBeCaptain: false,
     mainDish: '', 
@@ -61,6 +61,13 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
     e.preventDefault();
     if (!formData.fullName || !formData.email) return;
 
+    // Validar que todos los acompañantes tengan nombre y plato
+    const allCompanionsValid = companionDetails.every(c => c.name.trim() && c.mainDish);
+    if (companionDetails.length > 0 && !allCompanionsValid) {
+      alert('Por favor, completa el nombre y plato de todos los acompañantes');
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
@@ -68,7 +75,6 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
         ? companionDetails.map((c, i) => `Acompañante ${i + 1}: ${c.name || 'Sin nombre'} (${c.mainDish || 'Sin plato elegido'})`).join(' | ')
         : 'Ninguno';
 
-      // 1. Conexión con FormSubmit - AHORA CON ANTI-BLOQUEO
       const response = await fetch("https://formsubmit.co/ajax/parasigmita@gmail.com", {
         method: "POST",
         headers: {
@@ -77,9 +83,8 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
         },
         body: JSON.stringify({
             _subject: `¡Nueva confirmación de boda! - ${formData.fullName}`,
+            _cc: "lmarcosmarin@gmail.com", 
             _template: "table",
-            _captcha: "false", // ¡NUEVO! Desactiva el muro de seguridad de FormSubmit para AJAX
-            // _cc: "lmarcosmarin@gmail.com", // Lo desactivamos temporalmente para evitar bloqueos por SPAM
             
             Nombre: String(formData.fullName),
             Email: String(formData.email),
@@ -95,11 +100,10 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
         })
       });
 
-      // ¡NUEVO! Sistema de rastreo de errores más inteligente
       if (!response.ok) {
-         const errorInfo = await response.text();
-         console.error("FormSubmit devolvió un error:", errorInfo);
-         throw new Error(`El servidor rechazó el envío (Código: ${response.status})`);
+        const errorInfo = await response.text();
+        console.error("FormSubmit devolvió un error:", errorInfo);
+        throw new Error(`El servidor rechazó el envío (Código: ${response.status})`);
       }
 
       const msg = formData.attending === 'yes' 
@@ -119,7 +123,7 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
         attending: formData.attending as 'yes' | 'no' | 'pending',
         companions: Number(formData.companions) || 0,
         dietaryRestrictions: formData.dietaryRestrictions || '',
-        needsTransport: formData.needsTransport || 'no',
+        needsTransport: formData.needsTransport || 'No',
         message: formData.message || '',
         wantsToBeCaptain: formData.wantsToBeCaptain,
       } as Guest;
@@ -129,10 +133,27 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
 
     } catch (error) {
       console.error("Error al enviar el formulario:", error);
-      alert("Error al enviar. Por favor, asegúrate de no tener un AdBlocker activado e inténtalo de nuevo.");
+      alert("Hubo un error al enviar el formulario. Por favor, inténtalo de nuevo.");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const resetForm = () => {
+    setIsSuccess(false);
+    setFormData({
+      fullName: '',
+      email: '',
+      attending: 'yes',
+      companions: 0,
+      message: '',
+      dietaryRestrictions: '',
+      needsTransport: 'No',
+      wantsToBeCaptain: false,
+      mainDish: '',
+      songRequest: ''
+    });
+    setCompanionDetails([]);
   };
 
   if (isSuccess) {
@@ -142,11 +163,7 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
         <h3 className="text-2xl font-cinzel text-gray-800 mb-2">¡Confirmado!</h3>
         <p className="text-gray-600 font-serif italic mb-6">"{successMsg}"</p>
         <button 
-          onClick={() => { 
-            setIsSuccess(false); 
-            setFormData({ fullName: '', email: '', attending: 'yes', companions: 0, message: '', dietaryRestrictions: '', needsTransport: 'no', wantsToBeCaptain: false, mainDish: '', songRequest: ''});
-            setCompanionDetails([]); 
-          }}
+          onClick={resetForm}
           className="text-sm text-green-700 underline hover:text-green-800"
         >
           Enviar otro formulario
@@ -339,7 +356,7 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
                   type="radio" 
                   name="transport" 
                   value="No"
-                  checked={formData.needsTransport === 'No' || formData.needsTransport === 'no'}
+                  checked={formData.needsTransport === 'No'}
                   onChange={() => setFormData({ ...formData, needsTransport: 'No' })}
                   className="accent-wedding-gold h-4 w-4"
                 />
@@ -404,7 +421,7 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-gray-900 text-wedding-gold-light py-3 px-6 rounded-md hover:bg-gray-800 transition-all duration-300 font-cinzel tracking-wider flex items-center justify-center gap-2 disabled:opacity-50"
+        className="w-full bg-gray-900 text-wedding-gold-light py-3 px-6 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-cinzel tracking-wider flex items-center justify-center gap-2"
       >
         {isSubmitting ? 'Enviando...' : 'ENVIAR RESPUESTA'}
         {!isSubmitting && <Send className="h-4 w-4" />}
