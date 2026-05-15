@@ -59,7 +59,6 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
     e.preventDefault();
     if (!formData.fullName || !formData.email) return;
 
-    // Validar que todos los acompañantes tengan nombre y plato
     const allCompanionsValid = companionDetails.every(c => c.name.trim() && c.mainDish);
     if (companionDetails.length > 0 && !allCompanionsValid) {
       alert('Por favor, completa el nombre y plato de todos los acompañantes.');
@@ -73,37 +72,42 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
         ? companionDetails.map((c, i) => `Acompanante ${i + 1}: ${c.name || 'Sin nombre'} (${c.mainDish || 'Sin plato'})`).join(' | ')
         : 'Ninguno';
 
-      // VOLVEMOS AL MÉTODO ORIGINAL 100% FUNCIONAL
+      // EL TRUCO MAESTRO: Usamos URLSearchParams para saltarnos el bloqueo CORS del navegador
+      const submitData = new URLSearchParams();
+      
+      // Configuraciones del servidor
+      submitData.append("_subject", `¡Nueva confirmación de boda! - ${formData.fullName}`);
+      submitData.append("_template", "table");
+      submitData.append("_captcha", "false"); // Evitamos que pida verificación de semáforos por detrás
+
+      // Datos de tu boda
+      submitData.append("Nombre", formData.fullName || '');
+      submitData.append("Email", formData.email || '');
+      submitData.append("Asistencia", formData.attending === 'yes' ? 'Sí, allí estaré' : 'No podré asistir');
+      submitData.append("Plato_Principal", formData.mainDish || 'No aplica');
+      submitData.append("Numero_Acompanantes", String(formData.companions));
+      submitData.append("Detalles_Acompanantes", companionsString);
+      submitData.append("Alergias", formData.dietaryRestrictions || 'Ninguna');
+      submitData.append("Transporte", formData.needsTransport || 'No');
+      submitData.append("Capitan_Mesa", formData.wantsToBeCaptain ? 'Sí' : 'No');
+      submitData.append("Canciones_Sugeridas", formData.songRequest || 'Ninguna');
+      submitData.append("Mensaje", formData.message || 'Sin mensaje');
+
+      // Enviamos la petición sin Content-Type explícito (URLSearchParams lo hace seguro)
       const response = await fetch("https://formsubmit.co/ajax/parasigmita@gmail.com", {
         method: "POST",
         headers: {
-            'Content-Type': 'application/json',
             'Accept': 'application/json'
         },
-        body: JSON.stringify({
-            _subject: `¡Nueva confirmación de boda! - ${formData.fullName}`,
-            _template: "table",
-            
-            // DATOS LIMPIOS SIN "Ñ" NI CARACTERES RAROS EN LAS CLAVES
-            Nombre: formData.fullName,
-            Email: formData.email,
-            Asistencia: formData.attending === 'yes' ? 'Sí, allí estaré' : 'No podré asistir',
-            Plato_Principal: formData.mainDish || 'No aplica',
-            Numero_Acompanantes: formData.companions,
-            Detalles_Acompanantes: companionsString,
-            Alergias: formData.dietaryRestrictions || 'Ninguna',
-            Transporte: formData.needsTransport,
-            Capitan_Mesa: formData.wantsToBeCaptain ? 'Sí' : 'No',
-            Canciones_Sugeridas: formData.songRequest || 'Ninguna',
-            Mensaje: formData.message || 'Sin mensaje'
-        })
+        body: submitData
       });
 
       if (!response.ok) {
-        throw new Error("El servidor de FormSubmit rechazó el envío de datos.");
+        const errorText = await response.text();
+        throw new Error(`Error de servidor (${response.status}): ${errorText}`);
       }
 
-      // Lógica interna para la vista de Administrador de la web
+      // Si todo sale bien, procesamos el alta en la web
       const safeId = (window.crypto && window.crypto.randomUUID) 
         ? window.crypto.randomUUID() 
         : Date.now().toString();
@@ -124,9 +128,10 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
       onSubmit(newGuest);
       setIsSuccess(true);
 
-    } catch (error) {
-      console.error(error);
-      alert("Error en el envío. El servidor de correo no responde, por favor inténtalo de nuevo en unos minutos.");
+    } catch (error: any) {
+      console.error("Detalle del error:", error);
+      // Alerta dinámica que te dirá el error exacto (CORS, 403, Failed to Fetch, etc)
+      alert(`Lo sentimos, el envío falló. Detalle: ${error.message}. ¡Asegúrate de tener conexión y no usar navegadores ultra-privados (como Brave) para este paso!`);
     } finally {
       setIsSubmitting(false);
     }
