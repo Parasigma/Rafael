@@ -68,7 +68,7 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
         ? companionDetails.map((c, i) => `Acompañante ${i + 1}: ${c.name || 'Sin nombre'} (${c.mainDish || 'Sin plato elegido'})`).join(' | ')
         : 'Ninguno';
 
-      // 1. Envío seguro convirtiendo TODO a cadenas de texto
+      // 1. Conexión con FormSubmit - AHORA CON ANTI-BLOQUEO
       const response = await fetch("https://formsubmit.co/ajax/parasigmita@gmail.com", {
         method: "POST",
         headers: {
@@ -77,8 +77,9 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
         },
         body: JSON.stringify({
             _subject: `¡Nueva confirmación de boda! - ${formData.fullName}`,
-            _cc: "lmarcosmarin@gmail.com", 
             _template: "table",
+            _captcha: "false", // ¡NUEVO! Desactiva el muro de seguridad de FormSubmit para AJAX
+            // _cc: "lmarcosmarin@gmail.com", // Lo desactivamos temporalmente para evitar bloqueos por SPAM
             
             Nombre: String(formData.fullName),
             Email: String(formData.email),
@@ -89,14 +90,16 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
             Capitan_Mesa: formData.wantsToBeCaptain ? 'Sí' : 'No',
             Canciones_Sugeridas: String(formData.songRequest || 'Ninguna'),
             Mensaje: String(formData.message || 'Sin mensaje'),
-            Total_Acompañantes: String(formData.companions), // <-- Esto causaba el bloqueo
+            Total_Acompañantes: String(formData.companions),
             Detalle_Acompañantes: String(companionsString)
         })
       });
 
-      // Si FormSubmit rechaza la petición, disparamos el error conscientemente
+      // ¡NUEVO! Sistema de rastreo de errores más inteligente
       if (!response.ok) {
-         throw new Error("El servidor de correo rechazó la petición.");
+         const errorInfo = await response.text();
+         console.error("FormSubmit devolvió un error:", errorInfo);
+         throw new Error(`El servidor rechazó el envío (Código: ${response.status})`);
       }
 
       const msg = formData.attending === 'yes' 
@@ -104,7 +107,6 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
         : `Sentimos mucho que no puedas venir, ${formData.fullName}. ¡Te echaremos de menos!`;
       setSuccessMsg(msg);
 
-      // 2. Fallback de seguridad para el generador de IDs en móviles
       const safeId = (window.crypto && window.crypto.randomUUID) 
         ? window.crypto.randomUUID() 
         : Date.now().toString();
@@ -127,7 +129,7 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
 
     } catch (error) {
       console.error("Error al enviar el formulario:", error);
-      alert("Hubo un error de conexión al enviar el formulario. Por favor, inténtalo de nuevo.");
+      alert("Error al enviar. Por favor, asegúrate de no tener un AdBlocker activado e inténtalo de nuevo.");
     } finally {
       setIsSubmitting(false);
     }
@@ -388,4 +390,10 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
         </div>
       )}
 
-      <div className="space
+      <div className="space-y-2">
+        <label className="text-sm font-semibold text-gray-700 tracking-wide">Mensaje para los novios</label>
+        <textarea
+          rows={3}
+          className="w-full border-2 border-gray-100 rounded-lg p-3 focus:border-wedding-gold focus:outline-none transition-colors resize-none"
+          value={formData.message}
+          onChange={(e) => setFormData({ ...formData
