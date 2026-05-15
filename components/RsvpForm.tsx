@@ -75,29 +75,32 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
         ? companionDetails.map((c, i) => `Acompañante ${i + 1}: ${c.name || 'Sin nombre'} (${c.mainDish || 'Sin plato elegido'})`).join(' | ')
         : 'Ninguno';
 
+      // NUEVO MÉTODO: Usamos FormData para saltarnos el bloqueo CORS del navegador
+      const submitData = new FormData();
+      
+      // Configuraciones ocultas de FormSubmit
+      submitData.append("_subject", `¡Nueva confirmación de boda! - ${formData.fullName}`);
+      submitData.append("_cc", "lmarcosmarin@gmail.com"); 
+      submitData.append("_template", "table");
+      submitData.append("_captcha", "false");
+
+      // Datos reales del formulario
+      submitData.append("Nombre", String(formData.fullName));
+      submitData.append("Email", String(formData.email));
+      submitData.append("Asistencia", formData.attending === 'yes' ? 'Sí, allí estaré' : 'No podré asistir');
+      submitData.append("Plato_Principal", String(formData.mainDish || 'No aplica'));
+      submitData.append("Alergias", String(formData.dietaryRestrictions || 'Ninguna'));
+      submitData.append("Transporte", String(formData.needsTransport));
+      submitData.append("Capitan_Mesa", formData.wantsToBeCaptain ? 'Sí' : 'No');
+      submitData.append("Canciones_Sugeridas", String(formData.songRequest || 'Ninguna'));
+      submitData.append("Mensaje", String(formData.message || 'Sin mensaje'));
+      submitData.append("Total_Acompañantes", String(formData.companions));
+      submitData.append("Detalle_Acompañantes", String(companionsString));
+
+      // Enviamos la petición SIN headers. El navegador configurará el "multipart/form-data" automáticamente
       const response = await fetch("https://formsubmit.co/ajax/parasigmita@gmail.com", {
         method: "POST",
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-            _subject: `¡Nueva confirmación de boda! - ${formData.fullName}`,
-            _cc: "lmarcosmarin@gmail.com", 
-            _template: "table",
-            
-            Nombre: String(formData.fullName),
-            Email: String(formData.email),
-            Asistencia: formData.attending === 'yes' ? 'Sí, allí estaré' : 'No podré asistir',
-            Plato_Principal: String(formData.mainDish || 'No aplica'),
-            Alergias: String(formData.dietaryRestrictions || 'Ninguna'),
-            Transporte: String(formData.needsTransport),
-            Capitan_Mesa: formData.wantsToBeCaptain ? 'Sí' : 'No',
-            Canciones_Sugeridas: String(formData.songRequest || 'Ninguna'),
-            Mensaje: String(formData.message || 'Sin mensaje'),
-            Total_Acompañantes: String(formData.companions),
-            Detalle_Acompañantes: String(companionsString)
-        })
+        body: submitData
       });
 
       if (!response.ok) {
@@ -133,7 +136,7 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
 
     } catch (error) {
       console.error("Error al enviar el formulario:", error);
-      alert("Hubo un error al enviar el formulario. Por favor, inténtalo de nuevo.");
+      alert("Hubo un error de conexión con el servidor. Por favor, inténtalo de nuevo.");
     } finally {
       setIsSubmitting(false);
     }
@@ -356,7 +359,7 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
                   type="radio" 
                   name="transport" 
                   value="No"
-                  checked={formData.needsTransport === 'No'}
+                  checked={formData.needsTransport === 'No' || formData.needsTransport === 'no'}
                   onChange={() => setFormData({ ...formData, needsTransport: 'No' })}
                   className="accent-wedding-gold h-4 w-4"
                 />
