@@ -396,4 +396,19 @@ export const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit }) => {
           rows={3}
           className="w-full border-2 border-gray-100 rounded-lg p-3 focus:border-wedding-gold focus:outline-none transition-colors resize-none"
           value={formData.message}
-          onChange={(e) => setFormData({ ...formData
+          onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+          placeholder="Escribe algo bonito..."
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="w-full bg-gray-900 text-wedding-gold-light py-3 px-6 rounded-md hover:bg-gray-800 transition-all duration-300 font-cinzel tracking-wider flex items-center justify-center gap-2 disabled:opacity-50"
+      >
+        {isSubmitting ? 'Enviando...' : 'ENVIAR RESPUESTA'}
+        {!isSubmitting && <Send className="h-4 w-4" />}
+      </button>
+    </form>
+  );
+};
