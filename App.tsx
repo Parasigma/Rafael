@@ -115,7 +115,7 @@ const App: React.FC = () => {
         <div className="bg-white p-8 rounded-xl shadow-xl max-w-sm w-full z-10 mx-4 border border-white/50 backdrop-blur-sm">
           <div className="text-center mb-6">
             <Lock className="h-10 w-10 text-wedding-gold mx-auto mb-2" />
-            <h2 className="text-2xl font-cinzel text-gray-800">Acceso Novios</h2>
+            <h2 className="text-2xl font-cinzel text-gray-800">Admin</h2>
           </div>
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
